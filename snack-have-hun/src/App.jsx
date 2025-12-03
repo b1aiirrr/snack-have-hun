@@ -1,8 +1,30 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Plus, Minus, Search, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-// 1. VERCEL ANALYTICS
 import { Analytics } from "@vercel/analytics/react";
+
+// --- FAIL-SAFE IMAGE COMPONENT (Fixes the "Nothing Showing" bug) ---
+const ImageWithFallback = ({ src, alt }) => {
+  const [error, setError] = useState(false);
+
+  if (error || !src) {
+    return (
+      <div className="w-full h-full bg-orange-100 flex flex-col items-center justify-center text-orange-800 p-4 text-center border-b border-orange-200">
+        <span className="text-2xl mb-2">🍽️</span>
+        <span className="font-bold text-xs uppercase tracking-wider">{alt}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={src} 
+      alt={alt} 
+      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+      onError={() => setError(true)}
+    />
+  );
+};
 
 // --- CUSTOM LOGO ---
 const Logo = ({ className }) => (
@@ -14,7 +36,7 @@ const Logo = ({ className }) => (
   </div>
 );
 
-// --- VISUALLY ACCURATE MENU DATA ---
+// --- MENU DATA ---
 const INITIAL_MENU = [
   {
     id: 'fries', 
@@ -22,13 +44,13 @@ const INITIAL_MENU = [
     icon: '🍟',
     hero: 'https://images.unsplash.com/photo-1630384060421-a4323ceca041?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 101, name: 'Classic Fries', price: 100, desc: 'Golden, crispy potato sticks with a light salt touch.', img: 'https://images.unsplash.com/photo-1630384060421-a4323ceca041?auto=format&fit=crop&w=600&q=80' },
-      { id: 102, name: 'Plain Chips', price: 100, desc: 'Thick-cut and home-style, perfect for dipping.', img: 'https://images.unsplash.com/photo-1612174390004-941da7383617?auto=format&fit=crop&w=600&q=80' },
-      { id: 103, name: 'Masala Chips', price: 150, desc: 'Spicy, saucy, and bold—Nairobi’s favorite.', img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80' }, // Saucy/Spicy look
-      { id: 104, name: 'Garlic Chips', price: 120, desc: 'Crispy chips tossed in aromatic garlic butter.', img: 'https://images.unsplash.com/photo-1585109649139-3668018951a7?auto=format&fit=crop&w=600&q=80' },
-      { id: 105, name: 'Paprika Chips', price: 120, desc: 'Smoky and vibrant with a paprika kick.', img: 'https://images.unsplash.com/photo-1541592103007-ceb5d81a3b74?auto=format&fit=crop&w=600&q=80' },
-      { id: 106, name: 'Potato Sauté', price: 100, desc: 'Tender cubes sautéed with herbs.', img: 'https://images.unsplash.com/photo-1593560704563-f176a2eb61db?auto=format&fit=crop&w=600&q=80' },
-      { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky, crispy edges with a soft center.', img: 'https://images.unsplash.com/photo-1555198967-b72f44c4b63e?auto=format&fit=crop&w=600&q=80' },
+      { id: 101, name: 'Classic Fries', price: 100, desc: 'Golden, crispy potato sticks.', img: 'https://images.unsplash.com/photo-1573080496987-a199f8cd4054?auto=format&fit=crop&w=600&q=80' },
+      { id: 102, name: 'Plain Chips', price: 100, desc: 'Thick-cut home-style chips.', img: 'https://images.unsplash.com/photo-1612174390004-941da7383617?auto=format&fit=crop&w=600&q=80' },
+      { id: 103, name: 'Masala Chips', price: 150, desc: 'Spicy, saucy, and bold.', img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80' },
+      { id: 104, name: 'Garlic Chips', price: 120, desc: 'Tossed in garlic butter.', img: 'https://images.unsplash.com/photo-1585109649139-3668018951a7?auto=format&fit=crop&w=600&q=80' },
+      { id: 105, name: 'Paprika Chips', price: 120, desc: 'Smoky paprika kick.', img: 'https://images.unsplash.com/photo-1541592103007-ceb5d81a3b74?auto=format&fit=crop&w=600&q=80' },
+      { id: 106, name: 'Potato Sauté', price: 100, desc: 'Sautéed with herbs.', img: 'https://images.unsplash.com/photo-1593560704563-f176a2eb61db?auto=format&fit=crop&w=600&q=80' },
+      { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky and crispy.', img: 'https://images.unsplash.com/photo-1555198967-b72f44c4b63e?auto=format&fit=crop&w=600&q=80' },
     ]
   },
   {
@@ -37,22 +59,18 @@ const INITIAL_MENU = [
     icon: '🍖',
     hero: 'https://images.unsplash.com/photo-1606728035753-172774b8dbc0?auto=format&fit=crop&w=1200&q=80',
     items: [
-      // Pork
-      { id: 201, name: 'Dry Fry Pork', price: 350, desc: 'Crispy, seasoned pork bites.', img: 'https://images.unsplash.com/photo-1606728035753-172774b8dbc0?auto=format&fit=crop&w=600&q=80' }, // Roasted meat
-      { id: 202, name: 'Wet Fry Pork', price: 350, desc: 'Juicy pork in rich tomato gravy.', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80' }, // Stew appearance
-      { id: 203, name: 'Honey Glazed Pork', price: 350, desc: 'Sweet and sticky caramelized pork.', img: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?auto=format&fit=crop&w=600&q=80' },
-      // Beef
-      { id: 204, name: 'Dry Fry Beef', price: 300, desc: 'Spiced and seared beef chunks.', img: 'https://images.unsplash.com/photo-1558030006-4506719b740a?auto=format&fit=crop&w=600&q=80' }, // Seared meat
-      { id: 205, name: 'Wet Fry Beef', price: 300, desc: 'Tender beef in a flavorful stew.', img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80' }, // Stew
-      // Chicken
-      { id: 206, name: 'Dry Fry Chicken', price: 300, desc: 'Crispy chicken with bold seasoning.', img: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80' },
-      { id: 207, name: 'Wet Fry Chicken', price: 300, desc: 'Juicy chicken simmered in sauce.', img: 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80' },
-      { id: 208, name: 'Stir-Fried Wings', price: 300, desc: 'Herb and spice tossed crispy wings.', img: 'https://images.unsplash.com/photo-1569691899455-88464f6d3ab1?auto=format&fit=crop&w=600&q=80' },
-      { id: 209, name: 'Honey Glazed Wings', price: 300, desc: 'Sweet, sticky, and finger-licking.', img: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=600&q=80' },
-      // Sides
-      { id: 210, name: 'Plain Rice', price: 100, desc: 'Soft, fluffy steamed rice.', img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80' },
+      { id: 201, name: 'Dry Fry Pork', price: 350, desc: 'Crispy seasoned pork bites.', img: 'https://images.unsplash.com/photo-1606728035753-172774b8dbc0?auto=format&fit=crop&w=600&q=80' },
+      { id: 202, name: 'Wet Fry Pork', price: 350, desc: 'Juicy pork in tomato gravy.', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80' },
+      { id: 203, name: 'Honey Glazed Pork', price: 350, desc: 'Sweet sticky pork.', img: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?auto=format&fit=crop&w=600&q=80' },
+      { id: 204, name: 'Dry Fry Beef', price: 300, desc: 'Spiced seared beef.', img: 'https://images.unsplash.com/photo-1558030006-4506719b740a?auto=format&fit=crop&w=600&q=80' },
+      { id: 205, name: 'Wet Fry Beef', price: 300, desc: 'Tender beef stew.', img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80' },
+      { id: 206, name: 'Dry Fry Chicken', price: 300, desc: 'Crispy seasoned chicken.', img: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80' },
+      { id: 207, name: 'Wet Fry Chicken', price: 300, desc: 'Chicken in savory sauce.', img: 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80' },
+      { id: 208, name: 'Stir-Fried Wings', price: 300, desc: 'Herb tossed crispy wings.', img: 'https://images.unsplash.com/photo-1569691899455-88464f6d3ab1?auto=format&fit=crop&w=600&q=80' },
+      { id: 209, name: 'Honey Glazed Wings', price: 300, desc: 'Sweet and sticky.', img: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=600&q=80' },
+      { id: 210, name: 'Plain Rice', price: 100, desc: 'Soft steamed rice.', img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80' },
       { id: 211, name: 'Pilau', price: 150, desc: 'Aromatic spiced rice.', img: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=600&q=80' },
-      { id: 212, name: 'Ugali', price: 50, desc: 'Kenya’s classic maize staple.', img: 'https://images.unsplash.com/photo-1626508035297-00007798486f?auto=format&fit=crop&w=600&q=80' }, // White mound visual match
+      { id: 212, name: 'Ugali', price: 50, desc: 'Classic maize staple.', img: 'https://images.unsplash.com/photo-1626508035297-00007798486f?auto=format&fit=crop&w=600&q=80' },
     ]
   },
   {
@@ -61,17 +79,17 @@ const INITIAL_MENU = [
     icon: '🥟',
     hero: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 301, name: 'Beef Samosa', price: 50, desc: 'Crispy triangle with spiced beef.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80' }, // Triangle pastry
-      { id: 302, name: 'Chicken Samosa', price: 50, desc: 'Flaky pastry with tender chicken.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80' },
-      { id: 303, name: 'Vegetable Samosa', price: 50, desc: 'Crunchy veggie-packed center.', img: 'https://images.unsplash.com/photo-1589301760576-41f473911295?auto=format&fit=crop&w=600&q=80' },
-      { id: 304, name: 'Beef Spring Roll', price: 50, desc: 'Rolled and fried savory beef.', img: 'https://images.unsplash.com/photo-1548559134-2e2129e34a7d?auto=format&fit=crop&w=600&q=80' }, // Rolled pastry
-      { id: 305, name: 'Chicken Spring Roll', price: 50, desc: 'Crispy shell with juicy chicken.', img: 'https://images.unsplash.com/photo-1606335192275-d280b395f269?auto=format&fit=crop&w=600&q=80' },
-      { id: 306, name: 'Vegetable Spring Roll', price: 50, desc: 'Fresh seasoned veggies.', img: 'https://images.unsplash.com/photo-1544955355-6b83f0449d01?auto=format&fit=crop&w=600&q=80' },
-      { id: 307, name: 'Meat Pies', price: 50, desc: 'Buttery crust with meat filling.', img: 'https://images.unsplash.com/photo-1621251717327-640a3407ce5d?auto=format&fit=crop&w=600&q=80' },
-      { id: 308, name: 'Chicken Pies', price: 50, desc: 'Soft pastry with creamy chicken.', img: 'https://images.unsplash.com/photo-1621251717327-640a3407ce5d?auto=format&fit=crop&w=600&q=80' },
-      { id: 309, name: 'Sausages', price: 50, desc: 'Juicy grilled beef sausage.', img: 'https://images.unsplash.com/photo-1595908920188-6927dfd6771e?auto=format&fit=crop&w=600&q=80' },
+      { id: 301, name: 'Beef Samosa', price: 50, desc: 'Spiced beef triangle.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80' },
+      { id: 302, name: 'Chicken Samosa', price: 50, desc: 'Chicken filled pastry.', img: 'https://images.unsplash.com/photo-1626508035297-00007798486f?auto=format&fit=crop&w=600&q=80' }, 
+      { id: 303, name: 'Vegetable Samosa', price: 50, desc: 'Veggie filled crunch.', img: 'https://images.unsplash.com/photo-1589301760576-41f473911295?auto=format&fit=crop&w=600&q=80' },
+      { id: 304, name: 'Beef Spring Roll', price: 50, desc: 'Savory beef roll.', img: 'https://images.unsplash.com/photo-1548559134-2e2129e34a7d?auto=format&fit=crop&w=600&q=80' },
+      { id: 305, name: 'Chicken Spring Roll', price: 50, desc: 'Juicy chicken roll.', img: 'https://images.unsplash.com/photo-1606335192275-d280b395f269?auto=format&fit=crop&w=600&q=80' },
+      { id: 306, name: 'Vegetable Spring Roll', price: 50, desc: 'Seasoned veggie roll.', img: 'https://images.unsplash.com/photo-1544955355-6b83f0449d01?auto=format&fit=crop&w=600&q=80' },
+      { id: 307, name: 'Meat Pies', price: 50, desc: 'Hearty meat filling.', img: 'https://images.unsplash.com/photo-1621251717327-640a3407ce5d?auto=format&fit=crop&w=600&q=80' },
+      { id: 308, name: 'Chicken Pies', price: 50, desc: 'Creamy chicken pastry.', img: 'https://images.unsplash.com/photo-1608039773822-2e557620a811?auto=format&fit=crop&w=600&q=80' },
+      { id: 309, name: 'Sausages', price: 50, desc: 'Grilled beef sausage.', img: 'https://images.unsplash.com/photo-1595908920188-6927dfd6771e?auto=format&fit=crop&w=600&q=80' },
       { id: 310, name: 'Smokies', price: 50, desc: 'Smoked sausage.', img: 'https://images.unsplash.com/photo-1574312675971-886d34b3f81e?auto=format&fit=crop&w=600&q=80' },
-      { id: 311, name: 'Hot Dogs', price: 150, desc: 'Classic bun with sausage.', img: 'https://images.unsplash.com/photo-1612392062422-3ef1e6584d38?auto=format&fit=crop&w=600&q=80' },
+      { id: 311, name: 'Hot Dogs', price: 150, desc: 'Classic bun & sausage.', img: 'https://images.unsplash.com/photo-1612392062422-3ef1e6584d38?auto=format&fit=crop&w=600&q=80' },
       { id: 312, name: 'Burgers', price: 150, desc: 'Toasted bun, juicy patty.', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80' },
     ]
   },
@@ -94,14 +112,14 @@ const INITIAL_MENU = [
     icon: '🌟',
     hero: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Paprika Chips + Drink.', img: 'https://images.unsplash.com/photo-1625938145744-e38051541d1c?auto=format&fit=crop&w=600&q=80' },
-      { id: 502, name: 'Canvas Crunch', price: 500, desc: 'Chicken/Wings + Masala Chips + Drink.', img: 'https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=600&q=80' },
-      { id: 503, name: 'Retro Beef Fix', price: 500, desc: 'Dry Fry Beef + Garlic Chips + Drink.', img: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=600&q=80' },
-      { id: 504, name: 'The Haven Classic', price: 400, desc: 'Burger/Hot Dog + Fries + Drink.', img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=600&q=80' },
+      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Chips + Drink.', img: 'https://images.unsplash.com/photo-1625938145744-e38051541d1c?auto=format&fit=crop&w=600&q=80' },
+      { id: 502, name: 'Canvas Crunch', price: 500, desc: 'Chicken + Chips + Drink.', img: 'https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=600&q=80' },
+      { id: 503, name: 'Retro Beef Fix', price: 500, desc: 'Beef + Chips + Drink.', img: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=600&q=80' },
+      { id: 504, name: 'The Haven Classic', price: 400, desc: 'Burger + Fries + Drink.', img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=600&q=80' },
       { id: 505, name: 'Bites & Bliss', price: 400, desc: '2 Snacks + Fries + Drink.', img: 'https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?auto=format&fit=crop&w=600&q=80' },
-      { id: 506, name: 'Green Escape', price: 300, desc: 'Veg Samosa + Spring Roll + Chips.', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80' },
-      { id: 507, name: 'Little Haven Combo', price: 400, desc: 'Mini Burger + Fries + Juice.', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80' },
-      { id: 508, name: 'Family Feast', price: 1500, desc: '3 Mains + 3 Sides + 3 Drinks.', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80' },
+      { id: 506, name: 'Green Escape', price: 300, desc: 'Veg Snacks + Chips + Drink.', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80' },
+      { id: 507, name: 'Little Haven Combo', price: 400, desc: 'Mini Meal + Drink.', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80' },
+      { id: 508, name: 'Family Feast', price: 1500, desc: '3 Mains + Sides + Drinks.', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80' },
     ]
   }
 ];
@@ -114,7 +132,6 @@ export default function App() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // --- CART LOGIC ---
   const addToCart = (item) => {
     setCart(prev => {
       const existing = prev.find(i => i.id === item.id);
@@ -132,7 +149,6 @@ export default function App() {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const activeCatData = INITIAL_MENU.find(c => c.id === activeCategory);
 
-  // --- DEMO MODE PAYMENT ---
   const handleMpesaPayment = () => {
     if (!phoneNumber) {
       alert("Please enter a phone number");
@@ -227,17 +243,9 @@ export default function App() {
               whileHover={{ y: -5 }}
               className="bg-white rounded-xl shadow-sm border border-orange-100 flex flex-col justify-between group hover:border-orange-300 hover:shadow-xl transition-all h-full overflow-hidden"
             >
-              {/* ITEM IMAGE (Sub-Picture) */}
               <div className="h-48 overflow-hidden bg-gray-100 relative">
-                <img 
-                  src={item.img} 
-                  alt={item.name} 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"; // Fallback Image
-                  }}
-                />
+                {/* FAIL-SAFE IMAGE RENDERING */}
+                <ImageWithFallback src={item.img} alt={item.name} />
               </div>
 
               <div className="p-5 flex flex-col flex-grow">
