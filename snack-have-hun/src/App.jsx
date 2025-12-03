@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, LayoutDashboard, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Analytics } from "@vercel/analytics/react";
 
 // --- CUSTOM LOGO COMPONENT ---
 const Logo = ({ className }) => (
