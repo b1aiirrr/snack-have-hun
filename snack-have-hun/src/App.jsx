@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Plus, Minus, Search, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+// 1. VERCEL ANALYTICS IMPORT
 import { Analytics } from "@vercel/analytics/react";
-
 
 // --- CUSTOM LOGO COMPONENT ---
 const Logo = ({ className }) => (
@@ -37,19 +37,15 @@ const INITIAL_MENU = [
     icon: '🍖',
     hero: 'https://images.unsplash.com/photo-1544025162-d76690b6d015?auto=format&fit=crop&w=1200&q=80',
     items: [
-      // Pork
       { id: 201, name: 'Dry Fry Pork', price: 350, desc: 'Crispy, seasoned pork bites with a savory crunch.', img: 'https://images.unsplash.com/photo-1606728035753-172774b8dbc0?auto=format&fit=crop&w=400&q=80' },
       { id: 202, name: 'Wet Fry Pork', price: 350, desc: 'Juicy pork simmered in rich tomato and onion sauce.', img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=400&q=80' },
       { id: 203, name: 'Honey Glazed Pork', price: 350, desc: 'Sweet and sticky with a caramelized finish.', img: 'https://images.unsplash.com/photo-1608755728617-aefab37d25e2?auto=format&fit=crop&w=400&q=80' },
-      // Beef
       { id: 204, name: 'Dry Fry Beef', price: 300, desc: 'Spiced and seared to perfection—classic Kenyan comfort.', img: 'https://images.unsplash.com/photo-1603073163308-9654c3fb70b9?auto=format&fit=crop&w=400&q=80' },
       { id: 205, name: 'Wet Fry Beef', price: 300, desc: 'Tender beef in a flavorful stew, perfect with ugali.', img: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=400&q=80' },
-      // Chicken
       { id: 206, name: 'Dry Fry Chicken', price: 300, desc: 'Crispy chicken chunks with bold seasoning.', img: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=400&q=80' },
       { id: 207, name: 'Wet Fry Chicken', price: 300, desc: 'Juicy chicken simmered in savory sauce.', img: 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=400&q=80' },
       { id: 208, name: 'Stir-Fried Wings', price: 300, desc: 'Tossed in herbs and spice—crispy and crave-worthy.', img: 'https://images.unsplash.com/photo-1569691899455-88464f6d3ab1?auto=format&fit=crop&w=400&q=80' },
       { id: 209, name: 'Honey Glazed Wings', price: 300, desc: 'Sweet, sticky, and finger-licking good.', img: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=400&q=80' },
-      // Sides
       { id: 210, name: 'Plain Rice', price: 100, desc: 'Soft, fluffy, and perfect for soaking up sauces.', img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=400&q=80' },
       { id: 211, name: 'Pilau', price: 150, desc: 'Aromatic spiced rice with a rich, savory depth.', img: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=400&q=80' },
       { id: 212, name: 'Ugali', price: 50, desc: 'Kenya’s classic maize staple—firm, filling, and comforting.', img: 'https://images.unsplash.com/photo-1604569106263-54602f37a505?auto=format&fit=crop&w=400&q=80' },
@@ -337,6 +333,9 @@ export default function App() {
           </>
         )}
       </AnimatePresence>
+
+      {/* 2. VERCEL ANALYTICS COMPONENT */}
+      <Analytics />
     </div>
   );
 }
