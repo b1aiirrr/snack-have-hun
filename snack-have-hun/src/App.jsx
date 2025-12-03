@@ -90,7 +90,7 @@ const INITIAL_MENU = [
     icon: '🌟',
     hero: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Paprika Chips + Minute Maid/Water.', img: 'https://images.unsplash.com/photo-1625938145744-e38051541d1c?auto=format&fit=crop&w=400&q=80' },
+      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Paprika Chips + Minute Maid/Water.', img: 'https://www.google.com/imgres?q=the%20hog%20haven%20food%20combo&imgurl=https%3A%2F%2Fdynamic-media-cdn.tripadvisor.com%2Fmedia%2Fphoto-o%2F2f%2F9e%2F6b%2F4e%2Fsmoked-brisket.jpg%3Fw%3D900%26h%3D500%26s%3D1&imgrefurl=https%3A%2F%2Fwww.tripadvisor.com%2FRestaurant_Review-g50740-d1699504-Reviews-Hog_Heaven-New_Philadelphia_Ohio.html&docid=SVu48vfdCmENFM&tbnid=AyEf_dfaRUmPTM&vet=12ahUKEwi758qT6qCRAxUtpCcCHYd2ABsQM3oECBoQAA..i&w=900&h=500&hcb=2&ved=2ahUKEwi758qT6qCRAxUtpCcCHYd2ABsQM3oECBoQAA' },
       { id: 502, name: 'Canvas Crunch', price: 500, desc: 'Chicken/Wings + Masala Chips + Smoothie/Soda.', img: 'https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=400&q=80' },
       { id: 503, name: 'Retro Beef Fix', price: 500, desc: 'Dry Fry Beef + Garlic Chips + Milkshake/Water.', img: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=400&q=80' },
       { id: 504, name: 'The Haven Classic', price: 400, desc: 'Burger/Hot Dog + Classic Fries + Soda.', img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=400&q=80' },
