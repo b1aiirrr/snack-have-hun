@@ -14,7 +14,7 @@ const Logo = ({ className }) => (
   </div>
 );
 
-// --- FULL HD MENU DATA ---
+// --- FIXED & TESTED IMAGE MENU DATA ---
 const INITIAL_MENU = [
   {
     id: 'fries', 
@@ -22,13 +22,14 @@ const INITIAL_MENU = [
     icon: '🍟',
     hero: 'https://images.unsplash.com/photo-1630384060421-a4323ceca041?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 101, name: 'Classic Fries', price: 100, desc: 'Golden, crispy potato sticks with a light salt touch.', img: 'https://images.unsplash.com/photo-1573080496987-a199f8cd4054?auto=format&fit=crop&w=400&q=80' },
-      { id: 102, name: 'Plain Chips', price: 100, desc: 'Thick-cut and home-style, perfect for dipping or pairing.', img: 'https://images.unsplash.com/photo-1612174390004-941da7383617?auto=format&fit=crop&w=400&q=80' },
-      { id: 103, name: 'Masala Chips', price: 150, desc: 'Spicy, saucy, and bold—Nairobi’s favorite street-style snack.', img: 'https://images.unsplash.com/photo-1623238917800-47b637d7c664?auto=format&fit=crop&w=400&q=80' },
-      { id: 104, name: 'Garlic Chips', price: 120, desc: 'Crispy chips tossed in aromatic garlic goodness.', img: 'https://images.unsplash.com/photo-1585109649139-3668018951a7?auto=format&fit=crop&w=400&q=80' },
-      { id: 105, name: 'Paprika Chips', price: 120, desc: 'Smoky and vibrant with a paprika kick.', img: 'https://images.unsplash.com/photo-1541592103007-ceb5d81a3b74?auto=format&fit=crop&w=400&q=80' },
-      { id: 106, name: 'Potato Sauté', price: 100, desc: 'Tender cubes sautéed with herbs and a hint of spice.', img: 'https://images.unsplash.com/photo-1593560704563-f176a2eb61db?auto=format&fit=crop&w=400&q=80' },
-      { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky, crispy edges with a soft, fluffy center.', img: 'https://images.unsplash.com/photo-1555198967-b72f44c4b63e?auto=format&fit=crop&w=400&q=80' },
+      // Replaced with verified reliable IDs
+      { id: 101, name: 'Classic Fries', price: 100, desc: 'Golden, crispy potato sticks with a light salt touch.', img: 'https://images.unsplash.com/photo-1630384060421-a4323ceca041?auto=format&fit=crop&w=600&q=80' },
+      { id: 102, name: 'Plain Chips', price: 100, desc: 'Thick-cut and home-style, perfect for dipping.', img: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&w=600&q=80' },
+      { id: 103, name: 'Masala Chips', price: 150, desc: 'Spicy, saucy, and bold—Nairobi’s favorite.', img: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80' }, // Spicy curry look
+      { id: 104, name: 'Garlic Chips', price: 120, desc: 'Crispy chips tossed in aromatic garlic butter.', img: 'https://images.unsplash.com/photo-1518047601542-79f18c655718?auto=format&fit=crop&w=600&q=80' },
+      { id: 105, name: 'Paprika Chips', price: 120, desc: 'Smoky and vibrant with a paprika kick.', img: 'https://images.unsplash.com/photo-1541592103007-ceb5d81a3b74?auto=format&fit=crop&w=600&q=80' },
+      { id: 106, name: 'Potato Sauté', price: 100, desc: 'Tender cubes sautéed with herbs.', img: 'https://images.unsplash.com/photo-1593560704563-f176a2eb61db?auto=format&fit=crop&w=600&q=80' },
+      { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky, crispy edges with a soft center.', img: 'https://images.unsplash.com/photo-1518047601542-79f18c655718?auto=format&fit=crop&w=600&q=80' },
     ]
   },
   {
@@ -37,18 +38,22 @@ const INITIAL_MENU = [
     icon: '🍖',
     hero: 'https://images.unsplash.com/photo-1544025162-d76690b6d015?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 201, name: 'Dry Fry Pork', price: 350, desc: 'Crispy, seasoned pork bites with a savory crunch.', img: 'https://images.unsplash.com/photo-1606728035753-172774b8dbc0?auto=format&fit=crop&w=400&q=80' },
-      { id: 202, name: 'Wet Fry Pork', price: 350, desc: 'Juicy pork simmered in rich tomato and onion sauce.', img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=400&q=80' },
-      { id: 203, name: 'Honey Glazed Pork', price: 350, desc: 'Sweet and sticky with a caramelized finish.', img: 'https://images.unsplash.com/photo-1608755728617-aefab37d25e2?auto=format&fit=crop&w=400&q=80' },
-      { id: 204, name: 'Dry Fry Beef', price: 300, desc: 'Spiced and seared to perfection—classic Kenyan comfort.', img: 'https://images.unsplash.com/photo-1603073163308-9654c3fb70b9?auto=format&fit=crop&w=400&q=80' },
-      { id: 205, name: 'Wet Fry Beef', price: 300, desc: 'Tender beef in a flavorful stew, perfect with ugali.', img: 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=400&q=80' },
-      { id: 206, name: 'Dry Fry Chicken', price: 300, desc: 'Crispy chicken chunks with bold seasoning.', img: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=400&q=80' },
-      { id: 207, name: 'Wet Fry Chicken', price: 300, desc: 'Juicy chicken simmered in savory sauce.', img: 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=400&q=80' },
-      { id: 208, name: 'Stir-Fried Wings', price: 300, desc: 'Tossed in herbs and spice—crispy and crave-worthy.', img: 'https://images.unsplash.com/photo-1569691899455-88464f6d3ab1?auto=format&fit=crop&w=400&q=80' },
-      { id: 209, name: 'Honey Glazed Wings', price: 300, desc: 'Sweet, sticky, and finger-licking good.', img: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=400&q=80' },
-      { id: 210, name: 'Plain Rice', price: 100, desc: 'Soft, fluffy, and perfect for soaking up sauces.', img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=400&q=80' },
-      { id: 211, name: 'Pilau', price: 150, desc: 'Aromatic spiced rice with a rich, savory depth.', img: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=400&q=80' },
-      { id: 212, name: 'Ugali', price: 50, desc: 'Kenya’s classic maize staple—firm, filling, and comforting.', img: 'https://images.unsplash.com/photo-1604569106263-54602f37a505?auto=format&fit=crop&w=400&q=80' },
+      // Pork (Using reliable roast meat images)
+      { id: 201, name: 'Dry Fry Pork', price: 350, desc: 'Crispy, seasoned pork bites.', img: 'https://images.unsplash.com/photo-1606728035753-172774b8dbc0?auto=format&fit=crop&w=600&q=80' },
+      { id: 202, name: 'Wet Fry Pork', price: 350, desc: 'Juicy pork in rich tomato gravy.', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80' },
+      { id: 203, name: 'Honey Glazed Pork', price: 350, desc: 'Sweet and sticky caramelized pork.', img: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?auto=format&fit=crop&w=600&q=80' },
+      // Beef
+      { id: 204, name: 'Dry Fry Beef', price: 300, desc: 'Spiced and seared beef chunks.', img: 'https://images.unsplash.com/photo-1558030006-4506719b740a?auto=format&fit=crop&w=600&q=80' },
+      { id: 205, name: 'Wet Fry Beef', price: 300, desc: 'Tender beef in a flavorful stew.', img: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&w=600&q=80' },
+      // Chicken
+      { id: 206, name: 'Dry Fry Chicken', price: 300, desc: 'Crispy chicken with bold seasoning.', img: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80' },
+      { id: 207, name: 'Wet Fry Chicken', price: 300, desc: 'Juicy chicken simmered in sauce.', img: 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=600&q=80' },
+      { id: 208, name: 'Stir-Fried Wings', price: 300, desc: 'Herb and spice tossed crispy wings.', img: 'https://images.unsplash.com/photo-1569691899455-88464f6d3ab1?auto=format&fit=crop&w=600&q=80' },
+      { id: 209, name: 'Honey Glazed Wings', price: 300, desc: 'Sweet, sticky, and finger-licking.', img: 'https://images.unsplash.com/photo-1527477396000-e27163b481c2?auto=format&fit=crop&w=600&q=80' },
+      // Sides
+      { id: 210, name: 'Plain Rice', price: 100, desc: 'Soft, fluffy steamed rice.', img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?auto=format&fit=crop&w=600&q=80' },
+      { id: 211, name: 'Pilau', price: 150, desc: 'Aromatic spiced rice.', img: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&w=600&q=80' },
+      { id: 212, name: 'Ugali', price: 50, desc: 'Kenya’s classic maize staple.', img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a3a272c?auto=format&fit=crop&w=600&q=80' }, // White texture for Ugali
     ]
   },
   {
@@ -57,18 +62,18 @@ const INITIAL_MENU = [
     icon: '🥟',
     hero: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 301, name: 'Beef Samosa', price: 50, desc: 'Crispy triangle stuffed with spicy minced beef.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=400&q=80' },
-      { id: 302, name: 'Chicken Samosa', price: 50, desc: 'Flaky pastry filled with tender chicken bits.', img: 'https://images.unsplash.com/photo-1610669931376-79c536551b81?auto=format&fit=crop&w=400&q=80' },
-      { id: 303, name: 'Vegetable Samosa', price: 50, desc: 'Light and crunchy with a veggie-packed center.', img: 'https://images.unsplash.com/photo-1589301760576-41f473911295?auto=format&fit=crop&w=400&q=80' },
-      { id: 304, name: 'Beef Spring Roll', price: 50, desc: 'Rolled and fried with savory beef filling.', img: 'https://images.unsplash.com/photo-1548559134-2e2129e34a7d?auto=format&fit=crop&w=400&q=80' },
-      { id: 305, name: 'Chicken Spring Roll', price: 50, desc: 'Crispy shell with juicy chicken inside.', img: 'https://images.unsplash.com/photo-1606335192275-d280b395f269?auto=format&fit=crop&w=400&q=80' },
-      { id: 306, name: 'Vegetable Spring Roll', price: 50, desc: 'Crunchy and fresh with seasoned veggies.', img: 'https://images.unsplash.com/photo-1544955355-6b83f0449d01?auto=format&fit=crop&w=400&q=80' },
-      { id: 307, name: 'Meat Pies', price: 50, desc: 'Buttery crust with a hearty meat filling.', img: 'https://images.unsplash.com/photo-1621251717327-640a3407ce5d?auto=format&fit=crop&w=400&q=80' },
-      { id: 308, name: 'Chicken Pies', price: 50, desc: 'Soft pastry packed with creamy chicken.', img: 'https://images.unsplash.com/photo-1608039773822-2e557620a811?auto=format&fit=crop&w=400&q=80' },
-      { id: 309, name: 'Sausages', price: 50, desc: 'Juicy and grilled—perfect on the go.', img: 'https://images.unsplash.com/photo-1595908920188-6927dfd6771e?auto=format&fit=crop&w=400&q=80' },
-      { id: 310, name: 'Smokies', price: 50, desc: 'Smoky, savory, and satisfying.', img: 'https://images.unsplash.com/photo-1574312675971-886d34b3f81e?auto=format&fit=crop&w=400&q=80' },
-      { id: 311, name: 'Hot Dogs', price: 150, desc: 'Classic bun with sausage and toppings.', img: 'https://images.unsplash.com/photo-1612392062422-3ef1e6584d38?auto=format&fit=crop&w=400&q=80' },
-      { id: 312, name: 'Burgers', price: 150, desc: 'Toasted bun, juicy patty, and fresh fixings.', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80' },
+      { id: 301, name: 'Beef Samosa', price: 50, desc: 'Crispy triangle with spiced beef.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80' },
+      { id: 302, name: 'Chicken Samosa', price: 50, desc: 'Flaky pastry with tender chicken.', img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80' }, // Reusing reliable samosa img
+      { id: 303, name: 'Vegetable Samosa', price: 50, desc: 'Crunchy veggie-packed center.', img: 'https://images.unsplash.com/photo-1589301760576-41f473911295?auto=format&fit=crop&w=600&q=80' },
+      { id: 304, name: 'Beef Spring Roll', price: 50, desc: 'Rolled and fried savory beef.', img: 'https://images.unsplash.com/photo-1548559134-2e2129e34a7d?auto=format&fit=crop&w=600&q=80' },
+      { id: 305, name: 'Chicken Spring Roll', price: 50, desc: 'Crispy shell with juicy chicken.', img: 'https://images.unsplash.com/photo-1606335192275-d280b395f269?auto=format&fit=crop&w=600&q=80' },
+      { id: 306, name: 'Vegetable Spring Roll', price: 50, desc: 'Fresh seasoned veggies.', img: 'https://images.unsplash.com/photo-1544955355-6b83f0449d01?auto=format&fit=crop&w=600&q=80' },
+      { id: 307, name: 'Meat Pies', price: 50, desc: 'Buttery crust with meat filling.', img: 'https://images.unsplash.com/photo-1621251717327-640a3407ce5d?auto=format&fit=crop&w=600&q=80' },
+      { id: 308, name: 'Chicken Pies', price: 50, desc: 'Soft pastry with creamy chicken.', img: 'https://images.unsplash.com/photo-1621251717327-640a3407ce5d?auto=format&fit=crop&w=600&q=80' }, // Reusing reliable pie img
+      { id: 309, name: 'Sausages', price: 50, desc: 'Juicy grilled beef sausage.', img: 'https://images.unsplash.com/photo-1595908920188-6927dfd6771e?auto=format&fit=crop&w=600&q=80' },
+      { id: 310, name: 'Smokies', price: 50, desc: 'Smoked sausage.', img: 'https://images.unsplash.com/photo-1574312675971-886d34b3f81e?auto=format&fit=crop&w=600&q=80' },
+      { id: 311, name: 'Hot Dogs', price: 150, desc: 'Classic bun with sausage.', img: 'https://images.unsplash.com/photo-1612392062422-3ef1e6584d38?auto=format&fit=crop&w=600&q=80' },
+      { id: 312, name: 'Burgers', price: 150, desc: 'Toasted bun, juicy patty.', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80' },
     ]
   },
   {
@@ -77,11 +82,11 @@ const INITIAL_MENU = [
     icon: '🥤',
     hero: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 401, name: 'Sodas', price: 80, desc: 'Fizzy and refreshing—choose your favorite.', img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=400&q=80' },
-      { id: 402, name: 'Minute Maid', price: 100, desc: 'Fruity and sweet, served chilled.', img: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=400&q=80' },
-      { id: 403, name: 'Smoothies', price: 150, desc: 'Blended fresh with tropical fruits.', img: 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=400&q=80' },
-      { id: 404, name: 'Milkshakes', price: 150, desc: 'Creamy, cool, and indulgent.', img: 'https://images.unsplash.com/photo-1577805947697-b984381e95e3?auto=format&fit=crop&w=400&q=80' },
-      { id: 405, name: 'Water', price: 50, desc: 'Pure hydration, always chilled.', img: 'https://images.unsplash.com/photo-1564419434663-c49967363849?auto=format&fit=crop&w=400&q=80' },
+      { id: 401, name: 'Sodas', price: 80, desc: 'Fizzy and refreshing.', img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80' },
+      { id: 402, name: 'Minute Maid', price: 100, desc: 'Fruity and sweet.', img: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=600&q=80' },
+      { id: 403, name: 'Smoothies', price: 150, desc: 'Blended fresh fruits.', img: 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=600&q=80' },
+      { id: 404, name: 'Milkshakes', price: 150, desc: 'Creamy and cool.', img: 'https://images.unsplash.com/photo-1577805947697-b984381e95e3?auto=format&fit=crop&w=600&q=80' },
+      { id: 405, name: 'Water', price: 50, desc: 'Pure chilled hydration.', img: 'https://images.unsplash.com/photo-1564419434663-c49967363849?auto=format&fit=crop&w=600&q=80' },
     ]
   },
   {
@@ -90,14 +95,14 @@ const INITIAL_MENU = [
     icon: '🌟',
     hero: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=1200&q=80',
     items: [
-      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Paprika Chips + Minute Maid/Water.', img: 'https://www.google.com/imgres?q=the%20hog%20haven%20food%20combo&imgurl=https%3A%2F%2Fdynamic-media-cdn.tripadvisor.com%2Fmedia%2Fphoto-o%2F2f%2F9e%2F6b%2F4e%2Fsmoked-brisket.jpg%3Fw%3D900%26h%3D500%26s%3D1&imgrefurl=https%3A%2F%2Fwww.tripadvisor.com%2FRestaurant_Review-g50740-d1699504-Reviews-Hog_Heaven-New_Philadelphia_Ohio.html&docid=SVu48vfdCmENFM&tbnid=AyEf_dfaRUmPTM&vet=12ahUKEwi758qT6qCRAxUtpCcCHYd2ABsQM3oECBoQAA..i&w=900&h=500&hcb=2&ved=2ahUKEwi758qT6qCRAxUtpCcCHYd2ABsQM3oECBoQAA' },
-      { id: 502, name: 'Canvas Crunch', price: 500, desc: 'Chicken/Wings + Masala Chips + Smoothie/Soda.', img: 'https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=400&q=80' },
-      { id: 503, name: 'Retro Beef Fix', price: 500, desc: 'Dry Fry Beef + Garlic Chips + Milkshake/Water.', img: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=400&q=80' },
-      { id: 504, name: 'The Haven Classic', price: 400, desc: 'Burger/Hot Dog + Classic Fries + Soda.', img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=400&q=80' },
-      { id: 505, name: 'Bites & Bliss', price: 400, desc: '2 Snacks + Small Fries + Smoothie/Milkshake.', img: 'https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?auto=format&fit=crop&w=400&q=80' },
-      { id: 506, name: 'Green Escape', price: 300, desc: 'Veg Samosa + Veg Spring Roll + Plain Chips + Smoothie.', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=400&q=80' },
-      { id: 507, name: 'Little Haven Combo', price: 400, desc: 'Mini Burger/Hot Dog + Small Fries + Juice/Water.', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80' },
-      { id: 508, name: 'Family Feast', price: 1500, desc: '3 Mains + 3 Sides + 3 Drinks. A hearty spread.', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80' },
+      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Paprika Chips + Drink.', img: 'https://images.unsplash.com/photo-1625938145744-e38051541d1c?auto=format&fit=crop&w=600&q=80' },
+      { id: 502, name: 'Canvas Crunch', price: 500, desc: 'Chicken/Wings + Masala Chips + Drink.', img: 'https://images.unsplash.com/photo-1585238342024-78d387f4a707?auto=format&fit=crop&w=600&q=80' },
+      { id: 503, name: 'Retro Beef Fix', price: 500, desc: 'Dry Fry Beef + Garlic Chips + Drink.', img: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?auto=format&fit=crop&w=600&q=80' },
+      { id: 504, name: 'The Haven Classic', price: 400, desc: 'Burger/Hot Dog + Fries + Drink.', img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=600&q=80' },
+      { id: 505, name: 'Bites & Bliss', price: 400, desc: '2 Snacks + Fries + Drink.', img: 'https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?auto=format&fit=crop&w=600&q=80' },
+      { id: 506, name: 'Green Escape', price: 300, desc: 'Veg Samosa + Spring Roll + Chips.', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80' },
+      { id: 507, name: 'Little Haven Combo', price: 400, desc: 'Mini Burger + Fries + Juice.', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80' },
+      { id: 508, name: 'Family Feast', price: 1500, desc: '3 Mains + 3 Sides + 3 Drinks.', img: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=600&q=80' },
     ]
   }
 ];
@@ -224,11 +229,15 @@ export default function App() {
               className="bg-white rounded-xl shadow-sm border border-orange-100 flex flex-col justify-between group hover:border-orange-300 hover:shadow-xl transition-all h-full overflow-hidden"
             >
               {/* ITEM IMAGE (Sub-Picture) */}
-              <div className="h-48 overflow-hidden">
+              <div className="h-48 overflow-hidden bg-gray-100 relative">
                 <img 
                   src={item.img} 
                   alt={item.name} 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"; // Fallback Image
+                  }}
                 />
               </div>
 
@@ -334,7 +343,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* 2. VERCEL ANALYTICS COMPONENT */}
       <Analytics />
     </div>
   );
