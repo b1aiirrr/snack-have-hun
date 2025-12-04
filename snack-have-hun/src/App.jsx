@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-// --- FIX: Added 'Lock' and 'Save' to imports ---
 import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
@@ -43,7 +42,7 @@ const HERO_IMAGES = {
   combos: '/food/hero_combos.jpg'
 };
 
-// --- 1. CUSTOMER MENU ---
+// --- 1. CUSTOMER MENU (Lock Removed) ---
 const CustomerMenu = () => {
   const [menu, setMenu] = useState([]);
   const [activeCategory, setActiveCategory] = useState('fries');
@@ -104,7 +103,7 @@ const CustomerMenu = () => {
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-xl hidden sm:block text-orange-950">Snack Have Hun</h1></div>
         <div className="flex gap-3">
-          <Link to="/admin" className="p-2 text-gray-400 hover:text-orange-600"><Lock size={20}/></Link>
+          {/* LOCK ICON REMOVED - Admin accessed via URL only */}
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 hover:bg-orange-50 rounded-full">
             <ShoppingCart className="text-orange-700" />
             {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{cart.reduce((a,b) => a + b.qty, 0)}</span>}
@@ -146,7 +145,7 @@ const CustomerMenu = () => {
                 <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
                 <span className="bg-orange-50 text-orange-800 font-bold px-2 py-1 rounded text-sm">KES {item.price}</span>
               </div>
-              <p className="text-sm text-gray-500 mb-4 flex-grow">{item.desc_text}</p>
+              <p className="text-sm text-gray-500 mb-4 flex-grow">{item.description}</p>
               <button disabled={!item.available} onClick={() => addToCart(item)} className="w-full bg-orange-100 text-orange-800 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {item.available ? <><Plus size={18} /> Add</> : 'Unavailable'}
               </button>
@@ -267,7 +266,6 @@ const AdminDashboard = () => {
                       </button>
                     </td>
                     <td className="p-4">
-                      {/* --- THIS BUTTON WAS MISSING THE SAVE ICON BEFORE --- */}
                       <button onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)} className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"><Save size={16}/></button>
                     </td>
                   </tr>
