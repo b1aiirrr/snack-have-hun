@@ -122,14 +122,15 @@ const CustomerMenu = () => {
   const activeCatData = menu.find(c => c.id === activeCategory) || menu[0];
 
   // --- DARAJA API PAYMENT LOGIC ---
- const handlePayment = async () => {
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const handlePayment = async () => {
     if (!phoneNumber) return alert('Please enter your phone number');
     
     setIsProcessing(true);
 
     try {
       // Calls the file we just created: api/pay.js
-      const response = await axios.post('/api/pay', {
+      const response = await axios.post(`${API_BASE}/stkpush`, {
         phoneNumber: phoneNumber,
         amount: cartTotal
       });

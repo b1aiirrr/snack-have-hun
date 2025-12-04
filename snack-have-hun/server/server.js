@@ -86,4 +86,4 @@ app.post('/callback', (req, res) => {
     res.send('OK');
 });
 
-app.listen(5000, () => console.log('🚀 SERVER RELOADED - WAITING FOR ORDERS'));
+app.listen(process.env.PORT || 5000, () => console.log('🚀 SERVER RELOADED - WAITING FOR ORDERS on port', process.env.PORT || 5000));
