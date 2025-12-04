@@ -33,7 +33,32 @@ const Logo = () => (
   </div>
 );
 
-// --- STATIC MENU (Loads Instantly) ---
+// --- CONFIGURATION MAPPINGS ---
+const HERO_IMAGES = {
+  fries: '/food/hero_fries.jpg',
+  mains: '/food/hero_mains.jpg',
+  snacks: '/food/hero_snacks.jpg',
+  drinks: '/food/hero_drinks.jpg',
+  combos: '/food/hero_combos.jpg'
+};
+
+const CATEGORY_TITLES = {
+  fries: 'Fries & Chips',
+  mains: 'Main Course', // <--- FIXED HERE
+  snacks: 'Snacks & Bites',
+  drinks: 'Beverages',
+  combos: 'Signature Combos'
+};
+
+const CATEGORY_ICONS = {
+  fries: '🍟',
+  mains: '🍖',
+  snacks: '🥟',
+  drinks: '🥤',
+  combos: '🌟'
+};
+
+// --- STATIC FALLBACK MENU ---
 const INITIAL_MENU = [
   {
     id: 'fries', name: 'Fries & Chips', icon: '🍟', hero: '/food/hero_fries.jpg',
@@ -108,7 +133,6 @@ const INITIAL_MENU = [
 
 // --- 1. CUSTOMER MENU ---
 const CustomerMenu = () => {
-  // START WITH STATIC DATA (No Loading Screen)
   const [menu, setMenu] = useState(INITIAL_MENU);
   const [activeCategory, setActiveCategory] = useState('fries');
   const [cart, setCart] = useState([]);
@@ -116,17 +140,18 @@ const CustomerMenu = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // SILENTLY UPDATE FROM DB IN BACKGROUND
+  // FETCH DATA
   useEffect(() => {
     const fetchMenu = async () => {
       const { data, error } = await supabase.from('menu_items').select('*').order('id');
-      if (!error && data && data.length > 0) {
+      if (error) console.error('Error fetching menu:', error);
+      else if (data && data.length > 0) {
         const categories = ['fries', 'mains', 'snacks', 'drinks', 'combos'];
         const grouped = categories.map(cat => ({
           id: cat,
-          name: cat === 'fries' ? 'Fries & Chips' : cat.charAt(0).toUpperCase() + cat.slice(1),
-          icon: cat === 'fries' ? '🍟' : cat === 'mains' ? '🍖' : cat === 'snacks' ? '🥟' : cat === 'drinks' ? '🥤' : '🌟',
-          hero: `/food/hero_${cat}.jpg`, // Ensure hero matches local naming convention
+          name: CATEGORY_TITLES[cat], // <--- CORRECT TITLE LOGIC
+          icon: CATEGORY_ICONS[cat],
+          hero: HERO_IMAGES[cat],
           items: data.filter(i => i.category === cat)
         }));
         setMenu(grouped);
@@ -160,14 +185,12 @@ const CustomerMenu = () => {
     }, 2500);
   };
 
-  // REMOVED LOADING SPINNER - SITE LOADS INSTANTLY NOW
-
   return (
     <div className="min-h-screen bg-orange-50 font-sans text-gray-800 pb-20">
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-xl hidden sm:block text-orange-950">Snack Have Hun</h1></div>
         <div className="flex gap-3">
-          {/* Admin Link hidden, only accessible via URL /admin */}
+          {/* Admin Link accessible only via /admin URL */}
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 hover:bg-orange-50 rounded-full">
             <ShoppingCart className="text-orange-700" />
             {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{cart.reduce((a,b) => a + b.qty, 0)}</span>}
@@ -209,7 +232,6 @@ const CustomerMenu = () => {
                 <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
                 <span className="bg-orange-50 text-orange-800 font-bold px-2 py-1 rounded text-sm">KES {item.price}</span>
               </div>
-              {/* Fallback for description since initial data uses 'desc' but DB uses 'desc_text' */}
               <p className="text-sm text-gray-500 mb-4 flex-grow">{item.desc || item.desc_text}</p>
               <button disabled={!item.available} onClick={() => addToCart(item)} className="w-full bg-orange-100 text-orange-800 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {item.available ? <><Plus size={18} /> Add</> : 'Unavailable'}
