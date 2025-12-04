@@ -4,7 +4,7 @@ import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
-import 'intasend-inlinejs-sdk';
+import axios from 'axios'; // IMPORT AXIOS FOR API CALLS
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {
@@ -60,7 +60,7 @@ const CATEGORY_ICONS = {
   combos: '🌟'
 };
 
-// --- STATIC MENU (For Instant Loading) ---
+// --- STATIC MENU (For Instant Load) ---
 const INITIAL_MENU = [
   {
     id: 'fries', name: 'Fries & Chips', icon: '🍟', hero: '/food/hero_fries.jpg',
@@ -74,79 +74,24 @@ const INITIAL_MENU = [
       { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky and crispy.', img: '/food/potato_wedges.jpg', available: true },
     ]
   },
-  {
-    id: 'mains', name: 'Main Course', icon: '🍖', hero: '/food/hero_mains.jpg',
-    items: [
-      { id: 201, name: 'Dry Fry Pork', price: 350, desc: 'Crispy seasoned pork bites.', img: '/food/pork_dry.jpg', available: true },
-      { id: 202, name: 'Wet Fry Pork', price: 350, desc: 'Juicy pork in tomato gravy.', img: '/food/pork_wet.jpg', available: true },
-      { id: 203, name: 'Honey Glazed Pork', price: 350, desc: 'Sweet sticky pork.', img: '/food/pork_honey.jpg', available: true },
-      { id: 204, name: 'Dry Fry Beef', price: 300, desc: 'Spiced seared beef.', img: '/food/beef_dry.jpg', available: true },
-      { id: 205, name: 'Wet Fry Beef', price: 300, desc: 'Tender beef stew.', img: '/food/beef_wet.jpg', available: true },
-      { id: 206, name: 'Dry Fry Chicken', price: 300, desc: 'Crispy seasoned chicken.', img: '/food/chicken_dry.jpg', available: true },
-      { id: 207, name: 'Wet Fry Chicken', price: 300, desc: 'Chicken in savory sauce.', img: '/food/chicken_wet.jpg', available: true },
-      { id: 208, name: 'Stir-Fried Wings', price: 300, desc: 'Herb tossed crispy wings.', img: '/food/wings_stirfry.jpg', available: true },
-      { id: 209, name: 'Honey Glazed Wings', price: 300, desc: 'Sweet and sticky.', img: '/food/wings_honey.jpg', available: true },
-      { id: 210, name: 'Plain Rice', price: 100, desc: 'Soft steamed rice.', img: '/food/rice.jpg', available: true },
-      { id: 211, name: 'Pilau', price: 150, desc: 'Aromatic spiced rice.', img: '/food/pilau.jpg', available: true },
-      { id: 212, name: 'Ugali', price: 50, desc: 'Classic maize staple.', img: '/food/ugali.jpg', available: true },
-    ]
-  },
-  {
-    id: 'snacks', name: 'Snacks & Bites', icon: '🥟', hero: '/food/hero_snacks.jpg',
-    items: [
-      { id: 301, name: 'Beef Samosa', price: 50, desc: 'Spiced beef triangle.', img: '/food/samosa_beef.jpg', available: true },
-      { id: 302, name: 'Chicken Samosa', price: 50, desc: 'Chicken filled pastry.', img: '/food/samosa_chicken.jpg', available: true },
-      { id: 303, name: 'Vegetable Samosa', price: 50, desc: 'Veggie filled crunch.', img: '/food/samosa_veg.jpg', available: true },
-      { id: 304, name: 'Beef Spring Roll', price: 50, desc: 'Rolled savory beef.', img: '/food/roll_beef.jpg', available: true },
-      { id: 305, name: 'Chicken Spring Roll', price: 50, desc: 'Juicy chicken roll.', img: '/food/roll_chicken.jpg', available: true },
-      { id: 306, name: 'Vegetable Spring Roll', price: 50, desc: 'Seasoned veggie roll.', img: '/food/roll_veg.jpg', available: true },
-      { id: 307, name: 'Meat Pies', price: 50, desc: 'Buttery crust meat filling.', img: '/food/pie_meat.jpg', available: true },
-      { id: 308, name: 'Chicken Pies', price: 50, desc: 'Creamy chicken pastry.', img: '/food/pie_chicken.jpg', available: true },
-      { id: 309, name: 'Sausages', price: 50, desc: 'Juicy grilled sausage.', img: '/food/sausage.jpg', available: true },
-      { id: 310, name: 'Smokies', price: 50, desc: 'Smoked sausage.', img: '/food/smokie.jpg', available: true },
-      { id: 311, name: 'Hot Dogs', price: 150, desc: 'Classic bun & sausage.', img: '/food/hotdog.jpg', available: true },
-      { id: 312, name: 'Burgers', price: 150, desc: 'Toasted bun, juicy patty.', img: '/food/burger.jpg', available: true },
-    ]
-  },
-  {
-    id: 'drinks', name: 'Beverages', icon: '🥤', hero: '/food/hero_drinks.jpg',
-    items: [
-      { id: 401, name: 'Sodas', price: 80, desc: 'Fizzy and refreshing.', img: '/food/soda.jpg', available: true },
-      { id: 402, name: 'Minute Maid', price: 100, desc: 'Fruity and sweet.', img: '/food/juice.jpg', available: true },
-      { id: 403, name: 'Smoothies', price: 150, desc: 'Blended fresh fruits.', img: '/food/smoothie.jpg', available: true },
-      { id: 404, name: 'Milkshakes', price: 150, desc: 'Creamy and cool.', img: '/food/milkshake.jpg', available: true },
-      { id: 405, name: 'Water', price: 50, desc: 'Pure chilled hydration.', img: '/food/water.jpg', available: true },
-    ]
-  },
-  {
-    id: 'combos', name: 'Signature Combos', icon: '🌟', hero: '/food/hero_combos.jpg',
-    items: [
-      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Chips + Drink.', img: '/food/combo_hog.jpg', available: true },
-      { id: 502, name: 'Canvas Crunch', price: 500, desc: 'Chicken + Chips + Drink.', img: '/food/combo_chicken.jpg', available: true },
-      { id: 503, name: 'Retro Beef Fix', price: 500, desc: 'Beef + Chips + Drink.', img: '/food/combo_beef.jpg', available: true },
-      { id: 504, name: 'The Haven Classic', price: 400, desc: 'Burger + Fries + Drink.', img: '/food/combo_burger.jpg', available: true },
-      { id: 505, name: 'Bites & Bliss', price: 400, desc: '2 Snacks + Fries + Drink.', img: '/food/combo_bites.jpg', available: true },
-      { id: 506, name: 'Green Escape', price: 300, desc: 'Veg Snacks + Juice.', img: '/food/combo_veg.jpg', available: true },
-      { id: 507, name: 'Little Haven Combo', price: 400, desc: 'Mini Meal + Drink.', img: '/food/combo_kids.jpg', available: true },
-      { id: 508, name: 'Family Feast', price: 1500, desc: '3 Mains + Sides + Drinks.', img: '/food/combo_family.jpg', available: true },
-    ]
-  }
+  // ... (Other categories will load from DB, but this keeps the UI stable)
 ];
 
 // --- 1. CUSTOMER MENU ---
 const CustomerMenu = () => {
-  // Fix: Initialize with INITIAL_MENU so it displays INSTANTLY
   const [menu, setMenu] = useState(INITIAL_MENU);
   const [activeCategory, setActiveCategory] = useState('fries');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   
-  // FETCH FROM DATABASE (Silently update background)
+  // FETCH FROM DATABASE
   useEffect(() => {
     const fetchMenu = async () => {
       const { data, error } = await supabase.from('menu_items').select('*').order('id');
-      if (!error && data && data.length > 0) {
+      if (error) console.error('Error fetching menu:', error);
+      else if (data && data.length > 0) {
         const categories = ['fries', 'mains', 'snacks', 'drinks', 'combos'];
         const grouped = categories.map(cat => ({
           id: cat,
@@ -174,37 +119,36 @@ const CustomerMenu = () => {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const activeCatData = menu.find(c => c.id === activeCategory);
+  const activeCatData = menu.find(c => c.id === activeCategory) || menu[0];
 
-  // --- REAL INTASEND PAYMENT ---
-  const handlePayment = () => {
+  // --- DARAJA API PAYMENT LOGIC ---
+  const handlePayment = async () => {
     if (!phoneNumber) return alert('Please enter your phone number');
     
-    // 1. Initialize IntaSend
-    const intaSendInstance = new window.IntaSend({
-      publicAPIKey: "ISPubKey_test_0c2e041a-c2eb-42c2-b975-ae676cb2cfc3", // YOUR REAL KEY
-      live: false 
-    });
+    setIsProcessing(true);
 
-    // 2. Setup Events
-    intaSendInstance.on("COMPLETE", (results) => {
-      alert("✅ Payment Received! Your order is being prepared.");
-      setCart([]); 
-      setIsCartOpen(false);
-    });
+    try {
+      // Call YOUR Vercel Backend (api/pay.js)
+      const response = await axios.post('/api/pay', {
+        phoneNumber: phoneNumber,
+        amount: cartTotal
+      });
 
-    intaSendInstance.on("FAILED", (results) => {
-      alert("❌ Payment Failed. Please try again.");
-    });
+      console.log("Daraja Response:", response.data);
 
-    // 3. Launch Popup
-    intaSendInstance.run({
-      amount: cartTotal,
-      currency: "KES",
-      email: "order@snackhavehun.com",
-      mobile: phoneNumber,
-      api_ref: "order_" + Date.now()
-    });
+      if (response.data.ResponseCode === "0") {
+        alert(`✅ STK Push Sent to ${phoneNumber}! Check your phone to enter PIN.`);
+        setCart([]); // Clear cart assuming they will pay
+        setIsCartOpen(false);
+      } else {
+        alert("❌ Failed to send request. " + (response.data.errorMessage || "Try again."));
+      }
+    } catch (error) {
+      console.error(error);
+      alert("❌ Payment Error. Ensure you are entering a valid Safaricom number.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -281,13 +225,12 @@ const CustomerMenu = () => {
                 <div className="flex justify-between text-xl font-black mb-4"><span>Total</span><span className="text-orange-600">KES {cartTotal}</span></div>
                 <input type="tel" placeholder="0712..." value={phoneNumber} onChange={e=>setPhoneNumber(e.target.value)} className="w-full bg-gray-100 p-4 rounded-xl mb-3 border border-gray-200"/>
                 
-                {/* INTASEND PAY BUTTON */}
-                <button onClick={handlePayment} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2">
-                  Pay Now <CheckCircle size={20}/>
+                {/* DARAJA PAY BUTTON */}
+                <button onClick={handlePayment} disabled={isProcessing} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2">
+                  {isProcessing ? 'Processing...' : <>Pay with M-Pesa <CheckCircle size={20}/></>}
                 </button>
                 <div className="mt-3 flex justify-center gap-2 opacity-50">
-                  <img src="https://intasend-prod-static.s3.amazonaws.com/img/mpesa-logo.png" alt="M-Pesa" className="h-6" />
-                  <img src="https://intasend-prod-static.s3.amazonaws.com/img/visa-logo.png" alt="Visa" className="h-6" />
+                  <span className="text-xs text-gray-400">Secured by Daraja API</span>
                 </div>
               </div>
             </motion.div>
