@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save, Edit3, Trash2 } from 'lucide-react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+// --- FIX: Added 'Lock' and 'Save' to imports ---
+import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
+import { supabase } from './supabase';
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {
@@ -10,12 +12,17 @@ const FoodImage = ({ src, alt }) => {
   return (
     <div className="w-full h-full bg-gray-100 relative overflow-hidden">
       {error ? (
-        <div className="flex flex-col items-center justify-center h-full bg-orange-50 text-orange-800 p-2">
+        <div className="flex flex-col items-center justify-center h-full bg-orange-50 text-orange-800 p-2 text-center">
           <span className="text-2xl mb-1">🥘</span>
-          <span className="text-[10px] font-bold uppercase text-center">{alt}</span>
+          <span className="text-[10px] font-bold uppercase">{alt}</span>
         </div>
       ) : (
-        <img src={src} alt={alt} className="w-full h-full object-cover" onError={() => setError(true)} />
+        <img 
+          src={src} 
+          alt={alt} 
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
+          onError={() => setError(true)} 
+        />
       )}
     </div>
   );
@@ -27,86 +34,43 @@ const Logo = () => (
   </div>
 );
 
-// --- DATA SOURCE ---
-const INITIAL_MENU = [
-  {
-    id: 'fries', name: 'Fries & Chips', icon: '🍟', hero: '/food/hero_fries.jpg',
-    items: [
-      { id: 101, name: 'Classic Fries', price: 100, desc: 'Golden, crispy potato sticks.', img: '/food/classic_fries.jpg', available: true },
-      { id: 102, name: 'Plain Chips', price: 100, desc: 'Thick-cut home-style chips.', img: '/food/plain_chips.jpg', available: true },
-      { id: 103, name: 'Masala Chips', price: 150, desc: 'Spicy, saucy, and bold.', img: '/food/masala_chips.jpg', available: true },
-      { id: 104, name: 'Garlic Chips', price: 120, desc: 'Tossed in garlic butter.', img: '/food/garlic_chips.jpg', available: true },
-      { id: 105, name: 'Paprika Chips', price: 120, desc: 'Smoky paprika kick.', img: '/food/paprika_chips.jpg', available: true },
-      { id: 106, name: 'Potato Sauté', price: 100, desc: 'Sautéed with herbs.', img: '/food/potato_saute.jpg', available: true },
-      { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky and crispy.', img: '/food/potato_wedges.jpg', available: true },
-    ]
-  },
-  {
-    id: 'mains', name: 'Main Course', icon: '🍖', hero: '/food/hero_mains.jpg',
-    items: [
-      { id: 201, name: 'Dry Fry Pork', price: 350, desc: 'Crispy seasoned pork bites.', img: '/food/pork_dry.jpg', available: true },
-      { id: 202, name: 'Wet Fry Pork', price: 350, desc: 'Juicy pork in tomato gravy.', img: '/food/pork_wet.jpg', available: true },
-      { id: 203, name: 'Honey Glazed Pork', price: 350, desc: 'Sweet sticky pork.', img: '/food/pork_honey.jpg', available: true },
-      { id: 204, name: 'Dry Fry Beef', price: 300, desc: 'Spiced seared beef.', img: '/food/beef_dry.jpg', available: true },
-      { id: 205, name: 'Wet Fry Beef', price: 300, desc: 'Tender beef stew.', img: '/food/beef_wet.jpg', available: true },
-      { id: 206, name: 'Dry Fry Chicken', price: 300, desc: 'Crispy seasoned chicken.', img: '/food/chicken_dry.jpg', available: true },
-      { id: 207, name: 'Wet Fry Chicken', price: 300, desc: 'Chicken in savory sauce.', img: '/food/chicken_wet.jpg', available: true },
-      { id: 208, name: 'Stir-Fried Wings', price: 300, desc: 'Herb tossed crispy wings.', img: '/food/wings_stirfry.jpg', available: true },
-      { id: 209, name: 'Honey Glazed Wings', price: 300, desc: 'Sweet and sticky.', img: '/food/wings_honey.jpg', available: true },
-      { id: 210, name: 'Plain Rice', price: 100, desc: 'Soft steamed rice.', img: '/food/rice.jpg', available: true },
-      { id: 211, name: 'Pilau', price: 150, desc: 'Aromatic spiced rice.', img: '/food/pilau.jpg', available: true },
-      { id: 212, name: 'Ugali', price: 50, desc: 'Classic maize staple.', img: '/food/ugali.jpg', available: true },
-    ]
-  },
-  {
-    id: 'snacks', name: 'Snacks & Bites', icon: '🥟', hero: '/food/hero_snacks.jpg',
-    items: [
-      { id: 301, name: 'Beef Samosa', price: 50, desc: 'Spiced beef triangle.', img: '/food/samosa_beef.jpg', available: true },
-      { id: 302, name: 'Chicken Samosa', price: 50, desc: 'Chicken filled pastry.', img: '/food/samosa_chicken.jpg', available: true },
-      { id: 303, name: 'Vegetable Samosa', price: 50, desc: 'Veggie filled crunch.', img: '/food/samosa_veg.jpg', available: true },
-      { id: 304, name: 'Beef Spring Roll', price: 50, desc: 'Rolled and fried savory beef.', img: '/food/roll_beef.jpg', available: true },
-      { id: 305, name: 'Chicken Spring Roll', price: 50, desc: 'Juicy chicken roll.', img: '/food/roll_chicken.jpg', available: true },
-      { id: 306, name: 'Vegetable Spring Roll', price: 50, desc: 'Seasoned veggie roll.', img: '/food/roll_veg.jpg', available: true },
-      { id: 307, name: 'Meat Pies', price: 50, desc: 'Buttery crust with meat filling.', img: '/food/pie_meat.jpg', available: true },
-      { id: 308, name: 'Chicken Pies', price: 50, desc: 'Soft pastry with creamy chicken.', img: '/food/pie_chicken.jpg', available: true },
-      { id: 309, name: 'Sausages', price: 50, desc: 'Juicy grilled beef sausage.', img: '/food/sausage.jpg', available: true },
-      { id: 310, name: 'Smokies', price: 50, desc: 'Smoked sausage.', img: '/food/smokie.jpg', available: true },
-      { id: 311, name: 'Hot Dogs', price: 150, desc: 'Classic bun & sausage.', img: '/food/hotdog.jpg', available: true },
-      { id: 312, name: 'Burgers', price: 150, desc: 'Toasted bun, juicy patty.', img: '/food/burger.jpg', available: true },
-    ]
-  },
-  {
-    id: 'drinks', name: 'Beverages', icon: '🥤', hero: '/food/hero_drinks.jpg',
-    items: [
-      { id: 401, name: 'Sodas', price: 80, desc: 'Fizzy and refreshing.', img: '/food/soda.jpg', available: true },
-      { id: 402, name: 'Minute Maid', price: 100, desc: 'Fruity and sweet.', img: '/food/juice.jpg', available: true },
-      { id: 403, name: 'Smoothies', price: 150, desc: 'Blended fresh fruits.', img: '/food/smoothie.jpg', available: true },
-      { id: 404, name: 'Milkshakes', price: 150, desc: 'Creamy and cool.', img: '/food/milkshake.jpg', available: true },
-      { id: 405, name: 'Water', price: 50, desc: 'Pure chilled hydration.', img: '/food/water.jpg', available: true },
-    ]
-  },
-  {
-    id: 'combos', name: 'Signature Combos', icon: '🌟', hero: '/food/hero_combos.jpg',
-    items: [
-      { id: 501, name: 'The Hog Haven', price: 500, desc: 'Pork + Chips + Drink.', img: '/food/combo_hog.jpg', available: true },
-      { id: 502, name: 'Canvas Crunch', price: 500, desc: 'Chicken + Chips + Drink.', img: '/food/combo_chicken.jpg', available: true },
-      { id: 503, name: 'Retro Beef Fix', price: 500, desc: 'Beef + Chips + Drink.', img: '/food/combo_beef.jpg', available: true },
-      { id: 504, name: 'The Haven Classic', price: 400, desc: 'Burger + Fries + Drink.', img: '/food/combo_burger.jpg', available: true },
-      { id: 505, name: 'Bites & Bliss', price: 400, desc: '2 Snacks + Fries + Drink.', img: '/food/combo_bites.jpg', available: true },
-      { id: 506, name: 'Green Escape', price: 300, desc: 'Veg Snacks + Chips + Drink.', img: '/food/combo_veg.jpg', available: true },
-      { id: 507, name: 'Little Haven Combo', price: 400, desc: 'Mini Meal + Drink.', img: '/food/combo_kids.jpg', available: true },
-      { id: 508, name: 'Family Feast', price: 1500, desc: '3 Mains + Sides + Drinks.', img: '/food/combo_family.jpg', available: true },
-    ]
-  }
-];
+// --- HERO IMAGES MAPPING ---
+const HERO_IMAGES = {
+  fries: '/food/hero_fries.jpg',
+  mains: '/food/hero_mains.jpg',
+  snacks: '/food/hero_snacks.jpg',
+  drinks: '/food/hero_drinks.jpg',
+  combos: '/food/hero_combos.jpg'
+};
 
-// --- 1. CUSTOMER MENU PAGE ---
+// --- 1. CUSTOMER MENU ---
 const CustomerMenu = () => {
+  const [menu, setMenu] = useState([]);
   const [activeCategory, setActiveCategory] = useState('fries');
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // FETCH DATA
+  useEffect(() => {
+    const fetchMenu = async () => {
+      const { data, error } = await supabase.from('menu_items').select('*').order('id');
+      if (error) console.error('Error fetching menu:', error);
+      else {
+        const categories = ['fries', 'mains', 'snacks', 'drinks', 'combos'];
+        const grouped = categories.map(cat => ({
+          id: cat,
+          name: cat === 'fries' ? 'Fries & Chips' : cat.charAt(0).toUpperCase() + cat.slice(1),
+          icon: cat === 'fries' ? '🍟' : cat === 'mains' ? '🍖' : cat === 'snacks' ? '🥟' : cat === 'drinks' ? '🥤' : '🌟',
+          hero: HERO_IMAGES[cat],
+          items: data.filter(i => i.category === cat)
+        }));
+        setMenu(grouped);
+      }
+    };
+    fetchMenu();
+  }, []);
 
   const addToCart = (item) => {
     setCart(prev => {
@@ -121,7 +85,7 @@ const CustomerMenu = () => {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const activeCatData = INITIAL_MENU.find(c => c.id === activeCategory);
+  const activeCatData = menu.find(c => c.id === activeCategory);
 
   const handlePayment = () => {
     if(!phoneNumber) return alert('Enter phone number');
@@ -132,6 +96,8 @@ const CustomerMenu = () => {
       setCart([]); setIsCartOpen(false);
     }, 2500);
   };
+
+  if (menu.length === 0) return <div className="min-h-screen flex items-center justify-center font-bold text-orange-600 animate-pulse">Loading Menu...</div>;
 
   return (
     <div className="min-h-screen bg-orange-50 font-sans text-gray-800 pb-20">
@@ -159,7 +125,7 @@ const CustomerMenu = () => {
       {/* Tabs */}
       <div className="sticky top-[65px] z-30 bg-white/95 backdrop-blur py-3 border-b border-orange-100 shadow-sm overflow-x-auto">
         <div className="max-w-6xl mx-auto px-4 flex gap-3 min-w-max">
-          {INITIAL_MENU.map(cat => (
+          {menu.map(cat => (
             <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-5 py-2 rounded-full text-sm font-bold flex items-center gap-2 border transition-all ${activeCategory === cat.id ? 'bg-orange-900 text-white border-orange-900' : 'bg-white text-gray-600 border-gray-200'}`}>
               <span>{cat.icon}</span> {cat.name}
             </button>
@@ -180,7 +146,7 @@ const CustomerMenu = () => {
                 <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
                 <span className="bg-orange-50 text-orange-800 font-bold px-2 py-1 rounded text-sm">KES {item.price}</span>
               </div>
-              <p className="text-sm text-gray-500 mb-4 flex-grow">{item.desc}</p>
+              <p className="text-sm text-gray-500 mb-4 flex-grow">{item.desc_text}</p>
               <button disabled={!item.available} onClick={() => addToCart(item)} className="w-full bg-orange-100 text-orange-800 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-orange-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 {item.available ? <><Plus size={18} /> Add</> : 'Unavailable'}
               </button>
@@ -217,11 +183,24 @@ const CustomerMenu = () => {
   );
 };
 
-// --- 2. ADMIN DASHBOARD PAGE ---
+// --- 2. ADMIN DASHBOARD ---
 const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
-  const [menu, setMenu] = useState(INITIAL_MENU); // Local state for demo
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // FETCH RAW DATA FROM DB
+  useEffect(() => {
+    const loadData = async () => {
+      const { data, error } = await supabase.from('menu_items').select('*').order('id');
+      if (!error) {
+        setMenuItems(data);
+        setLoading(false);
+      }
+    };
+    if (isAuthenticated) loadData();
+  }, [isAuthenticated]);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -229,16 +208,20 @@ const AdminDashboard = () => {
     else alert('Wrong PIN');
   };
 
-  const updatePrice = (catId, itemId, newPrice) => {
-    setMenu(prev => prev.map(cat => 
-      cat.id === catId ? { ...cat, items: cat.items.map(item => item.id === itemId ? { ...item, price: parseInt(newPrice) } : item) } : cat
-    ));
+  const updatePrice = async (id, newPrice) => {
+    const { error } = await supabase.from('menu_items').update({ price: newPrice }).eq('id', id);
+    if (!error) {
+      alert('Price Updated!');
+    } else {
+      alert('Error updating price');
+    }
   };
 
-  const toggleAvailability = (catId, itemId) => {
-    setMenu(prev => prev.map(cat => 
-      cat.id === catId ? { ...cat, items: cat.items.map(item => item.id === itemId ? { ...item, available: !item.available } : item) } : cat
-    ));
+  const toggleStock = async (id, currentStatus) => {
+    const { error } = await supabase.from('menu_items').update({ available: !currentStatus }).eq('id', id);
+    if (!error) {
+      setMenuItems(prev => prev.map(i => i.id === id ? { ...i, available: !currentStatus } : i));
+    }
   };
 
   if (!isAuthenticated) {
@@ -247,8 +230,7 @@ const AdminDashboard = () => {
         <div className="bg-white p-8 rounded-2xl w-full max-w-sm shadow-2xl">
           <div className="flex justify-center mb-6"><Logo /></div>
           <h2 className="text-2xl font-black text-center mb-1">Admin Access</h2>
-          <p className="text-gray-400 text-center text-sm mb-6">Enter your owner PIN</p>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4 mt-6">
             <input type="password" placeholder="PIN" className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-center text-2xl tracking-widest font-black" value={password} onChange={e => setPassword(e.target.value)} />
             <button className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-700 transition">Unlock Dashboard</button>
           </form>
@@ -262,47 +244,38 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-3"><Logo /><h2 className="font-bold text-gray-900">Admin Dashboard</h2></div>
-        <button onClick={() => setIsAuthenticated(false)} className="text-sm font-bold text-red-600 bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100">Log Out</button>
+        <button onClick={() => setIsAuthenticated(false)} className="text-sm font-bold text-red-600 bg-red-50 px-4 py-2 rounded-lg">Log Out</button>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {menu.map(cat => (
-          <div key={cat.id} className="mb-8">
-            <h3 className="text-lg font-black text-gray-800 uppercase tracking-wide mb-4 flex items-center gap-2"><span className="text-2xl">{cat.icon}</span> {cat.name}</h3>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-100 text-xs text-gray-500 uppercase">
-                  <tr>
-                    <th className="p-4">Item</th>
-                    <th className="p-4 w-32">Price (KES)</th>
-                    <th className="p-4 w-32 text-center">Status</th>
+        {loading ? <p>Loading items...</p> : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table className="w-full text-left">
+              <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
+                <tr><th className="p-4">Item</th><th className="p-4">Price</th><th className="p-4 text-center">Stock</th><th className="p-4">Action</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {menuItems.map(item => (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="p-4 font-bold text-sm text-gray-700">{item.name} <span className="text-gray-400 font-normal ml-2">({item.category})</span></td>
+                    <td className="p-4">
+                      <input type="number" defaultValue={item.price} id={`price-${item.id}`} className="w-20 p-2 border rounded bg-white font-mono" />
+                    </td>
+                    <td className="p-4 text-center">
+                      <button onClick={() => toggleStock(item.id, item.available)} className={`px-3 py-1 rounded-full text-xs font-bold ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        {item.available ? 'In Stock' : 'Sold Out'}
+                      </button>
+                    </td>
+                    <td className="p-4">
+                      {/* --- THIS BUTTON WAS MISSING THE SAVE ICON BEFORE --- */}
+                      <button onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)} className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"><Save size={16}/></button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {cat.items.map(item => (
-                    <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="p-4 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100"><img src={item.img} className="w-full h-full object-cover" alt="" /></div>
-                        <span className="font-bold text-gray-700 text-sm">{item.name}</span>
-                      </td>
-                      <td className="p-4">
-                        <input type="number" value={item.price} onChange={(e) => updatePrice(cat.id, item.id, e.target.value)} className="w-24 p-2 border border-gray-200 rounded-lg font-mono font-bold text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none" />
-                      </td>
-                      <td className="p-4 text-center">
-                        <button onClick={() => toggleAvailability(cat.id, item.id)} className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                          {item.available ? 'In Stock' : 'Sold Out'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        ))}
-      </div>
-      <div className="fixed bottom-6 right-6">
-        <Link to="/" className="bg-gray-900 text-white px-6 py-3 rounded-full font-bold shadow-2xl hover:scale-105 transition flex items-center gap-2">View Live Site <ChevronRight size={16}/></Link>
+        )}
       </div>
     </div>
   );
