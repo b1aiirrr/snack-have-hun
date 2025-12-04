@@ -64,7 +64,17 @@ export default async function handler(req, res) {
     return res.status(200).json(stkResponse.data);
 
   } catch (error) {
-    console.error("Daraja Error:", error.response?.data || error.message);
-    return res.status(500).json({ error: error.response?.data || error.message });
+    console.error("Daraja Error raw:", error);
+
+    const data = error.response?.data;
+    const status = error.response?.status;
+
+    console.error("Daraja Error details:", JSON.stringify({ status, data }, null, 2));
+
+    return res.status(500).json({
+      message: "Daraja request failed",
+      status,
+      data,
+    });
   }
 }
