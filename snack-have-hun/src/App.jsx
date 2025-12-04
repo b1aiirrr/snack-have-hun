@@ -122,13 +122,13 @@ const CustomerMenu = () => {
   const activeCatData = menu.find(c => c.id === activeCategory) || menu[0];
 
   // --- DARAJA API PAYMENT LOGIC ---
-  const handlePayment = async () => {
+ const handlePayment = async () => {
     if (!phoneNumber) return alert('Please enter your phone number');
     
     setIsProcessing(true);
 
     try {
-      // Call YOUR Vercel Backend (api/pay.js)
+      // Calls the file we just created: api/pay.js
       const response = await axios.post('/api/pay', {
         phoneNumber: phoneNumber,
         amount: cartTotal
@@ -136,16 +136,17 @@ const CustomerMenu = () => {
 
       console.log("Daraja Response:", response.data);
 
+      // Check if Safaricom accepted the request
       if (response.data.ResponseCode === "0") {
         alert(`✅ STK Push Sent to ${phoneNumber}! Check your phone to enter PIN.`);
-        setCart([]); // Clear cart assuming they will pay
+        setCart([]); 
         setIsCartOpen(false);
       } else {
-        alert("❌ Failed to send request. " + (response.data.errorMessage || "Try again."));
+        alert("❌ Safaricom Error: " + (response.data.errorMessage || "Try again."));
       }
     } catch (error) {
       console.error(error);
-      alert("❌ Payment Error. Ensure you are entering a valid Safaricom number.");
+      alert("❌ Connection Error. Please try again.");
     } finally {
       setIsProcessing(false);
     }
