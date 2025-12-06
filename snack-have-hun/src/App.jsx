@@ -255,6 +255,14 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeAdminTab, setActiveAdminTab] = useState('menu');
+  const [newItem, setNewItem] = useState({
+    name: '',
+    price: '',
+    category: 'fries',
+    img: '',
+    desc: '',
+  });
+  const [addMessage, setAddMessage] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -286,11 +294,9 @@ const AdminDashboard = () => {
   const updatePrice = async (id, newPrice) => {
     const { error } = await supabase.from('menu_items').update({ price: newPrice }).eq('id', id);
     if (!error) {
-      alert('Price Updated!');
       refreshData();
     }
   };
-
   const toggleStock = async (id, currentStatus) => {
     const { error } = await supabase.from('menu_items').update({ available: !currentStatus }).eq('id', id);
     if (!error) setMenuItems(prev => prev.map(i => i.id === id ? { ...i, available: !currentStatus } : i));
@@ -305,28 +311,41 @@ const AdminDashboard = () => {
   };
 
   const addItem = async () => {
-    const name = window.prompt('Item name');
-    if (!name) return;
-    const priceStr = window.prompt('Price (KES)');
-    if (!priceStr) return;
-    const price = Number(priceStr);
-    const category = window.prompt('Category (fries, mains, snacks, drinks, combos)');
-    if (!category) return;
-    const img = window.prompt('Image path (e.g. /food/my_image.jpg)') || '';
-    const desc = window.prompt('Description') || '';
+    setAddMessage('');
+    if (!newItem.name || !newItem.price || !newItem.category) {
+      setAddMessage('Please fill in name, price and category.');
+      return;
+    }
+
+    const price = Number(newItem.price);
+    if (Number.isNaN(price) || price <= 0) {
+      setAddMessage('Price must be a positive number.');
+      return;
+    }
 
     const { error } = await supabase.from('menu_items').insert({
-      name,
+      name: newItem.name,
       price,
-      category,
-      img,
-      desc,
+      category: newItem.category,
+      img: newItem.img || '',
+      desc: newItem.desc || '',
       available: true,
     });
-    if (!error) {
-      alert('Item added');
-      refreshData();
+    if (error) {
+      console.error('Error adding item:', error);
+      setAddMessage('Error adding item. Please try again.');
+      return;
     }
+
+    setAddMessage('Item added successfully.');
+    setNewItem({
+      name: '',
+      price: '',
+      category: 'fries',
+      img: '',
+      desc: '',
+    });
+    refreshData();
   };
 
   const updateOrderStatus = async (id, status) => {
@@ -377,14 +396,93 @@ const AdminDashboard = () => {
         <div className="flex-1 space-y-8">
           {activeAdminTab === 'menu' && (
             <>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg">Menu Items</h3>
-                <button
-                  onClick={addItem}
-                  className="px-3 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold"
-                >
-                  + Add Item
-                </button>
+              <div className="space-y-4 mb-6">
+                <h3 className="font-bold text-lg">Add New Menu Item</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-gray-200">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-500 uppercase">
+                      Food Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newItem.name}
+                      onChange={e => setNewItem({ ...newItem, name: e.target.value })}
+                      className="w-full p-2 border rounded bg-gray-50"
+                      placeholder="e.g. Classic Fries"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-500 uppercase">
+                      Price (KES)
+                    </label>
+                    <input
+                      type="number"
+                      value={newItem.price}
+                      onChange={e => setNewItem({ ...newItem, price: e.target.value })}
+                      className="w-full p-2 border rounded bg-gray-50"
+                      placeholder="e.g. 150"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-500 uppercase">
+                      Category
+                    </label>
+                    <select
+                      value={newItem.category}
+                      onChange={e => setNewItem({ ...newItem, category: e.target.value })}
+                      className="w-full p-2 border rounded bg-gray-50"
+                    >
+                      <option value="fries">Fries & Chips</option>
+                      <option value="mains">Main Course</option>
+                      <option value="snacks">Snacks & Bites</option>
+                      <option value="drinks">Beverages</option>
+                      <option value="combos">Signature Combos</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-500 uppercase">
+                      Image Path
+                    </label>
+                    <input
+                      type="text"
+                      value={newItem.img}
+                      onChange={e => setNewItem({ ...newItem, img: e.target.value })}
+                      className="w-full p-2 border rounded bg-gray-50"
+                      placeholder="/food/my_image.jpg"
+                    />
+                  </div>
+
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase">
+                      Description
+                    </label>
+                    <textarea
+                      value={newItem.desc}
+                      onChange={e => setNewItem({ ...newItem, desc: e.target.value })}
+                      className="w-full p-2 border rounded bg-gray-50"
+                      rows={2}
+                      placeholder="Short description of the item"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 flex items-center justify-between">
+                    <button
+                      onClick={addItem}
+                      type="button"
+                      className="px-4 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold"
+                    >
+                      + Add Item
+                    </button>
+                    {addMessage && (
+                      <span className="text-xs text-gray-600">{addMessage}</span>
+                    )}
+                  </div>
+                </div>
+
+                <h3 className="font-bold text-lg">Existing Menu Items</h3>
               </div>
               {loading ? <p>Loading...</p> : (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
@@ -504,6 +602,9 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+      <footer className="mt-10 py-4 text-center text-xs text-gray-400">
+        © {new Date().getFullYear()} Snack Have Hun Admin Panel. All rights reserved.
+      </footer>
     </div>
   );
 };
