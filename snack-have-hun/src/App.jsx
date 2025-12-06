@@ -4,6 +4,7 @@ import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
+import SocialFooter from './components/SocialFooter';
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {

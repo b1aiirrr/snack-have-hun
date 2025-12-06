@@ -1,0 +1,49 @@
+.social-footer {
+  padding: 12px 8px;
+  display: flex;
+  justify-content: center;
+  background: transparent;
+}
+
+.social-list {
+  display: flex;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.social-link {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: #000;            /* black circle */
+  color: #fff;                 /* icon color */
+  border-radius: 999px;
+  text-decoration: none;
+  transition: transform .14s ease, background .14s ease;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.2) inset;
+}
+
+.social-link:hover,
+.social-link:focus {
+  transform: translateY(-3px);
+  background: #111;
+  outline: none;
+}
+
+.social-link .icon svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px,1px,1px,1px);
+  white-space: nowrap;
+}
