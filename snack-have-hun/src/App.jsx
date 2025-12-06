@@ -4,7 +4,6 @@ import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
-import axios from 'axios'; // IMPORT AXIOS FOR API CALLS
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {
@@ -29,8 +28,11 @@ const FoodImage = ({ src, alt }) => {
 };
 
 const Logo = () => (
-  <div className="relative w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-3 border-2 border-white">
-    <span className="text-white font-black text-xl italic tracking-tighter">SHH</span>
+  <div className="relative flex items-center">
+    <div className="relative w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-3 border-2 border-white">
+      <span className="text-white font-black text-xl italic tracking-tighter">SHH</span>
+    </div>
+    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow" />
   </div>
 );
 
@@ -84,7 +86,6 @@ const CustomerMenu = () => {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   
   // FETCH FROM DATABASE
   useEffect(() => {
@@ -111,7 +112,6 @@ const CustomerMenu = () => {
       const existing = prev.find(i => i.id === item.id);
       return existing ? prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i) : [...prev, { ...item, qty: 1 }];
     });
-    setIsCartOpen(true);
   };
 
   const updateQty = (id, delta) => {
@@ -121,41 +121,9 @@ const CustomerMenu = () => {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const activeCatData = menu.find(c => c.id === activeCategory) || menu[0];
 
-  // --- DARAJA API PAYMENT LOGIC ---
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-  const handlePayment = async () => {
-    if (!phoneNumber) return alert('Please enter your phone number');
-    
-    setIsProcessing(true);
-
-    try {
-      // Calls the file we just created: api/pay.js
-      const response = await axios.post(`${API_BASE}/stkpush`, {
-        phoneNumber: phoneNumber,
-        amount: cartTotal
-      });
-
-      console.log("Daraja Response:", response.data);
-
-      // Check if Safaricom accepted the request
-      if (response.data.ResponseCode === "0") {
-        alert(`✅ STK Push Sent to ${phoneNumber}! Check your phone to enter PIN.`);
-        setCart([]); 
-        setIsCartOpen(false);
-      } else {
-        alert("❌ Safaricom Error: " + (response.data.errorMessage || "Try again."));
-      }
-    } catch (error) {
-      console.error(error);
-      alert("❌ Connection Error. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-orange-50 font-sans text-gray-800 pb-20">
-      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
+      <nav className="sticky top-0 z-40 bg-white shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-xl hidden sm:block text-orange-950">Snack Have Hun</h1></div>
         <div className="flex gap-3">
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 hover:bg-orange-50 rounded-full">
@@ -227,12 +195,45 @@ const CustomerMenu = () => {
                 <div className="flex justify-between text-xl font-black mb-4"><span>Total</span><span className="text-orange-600">KES {cartTotal}</span></div>
                 <input type="tel" placeholder="0712..." value={phoneNumber} onChange={e=>setPhoneNumber(e.target.value)} className="w-full bg-gray-100 p-4 rounded-xl mb-3 border border-gray-200"/>
                 
-                {/* DARAJA PAY BUTTON */}
-                <button onClick={handlePayment} disabled={isProcessing} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2">
-                  {isProcessing ? 'Processing...' : <>Pay with M-Pesa <CheckCircle size={20}/></>}
-                </button>
+                {/* MANUAL TILL NUMBER PAYMENT */}
+                <div className="space-y-3">
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-900">
+                    <p className="font-bold">Pay via M-Pesa Till Number</p>
+                    <p className="mt-1">
+                      1. Open <span className="font-semibold">M-Pesa</span> on your phone<br/>
+                      2. Lipa na M-Pesa → Buy Goods and Services<br/>
+                      3. Till Number: <span className="font-mono font-bold">6920615</span><br/>
+                      4. Amount: <span className="font-mono font-bold">KES {cartTotal}</span><br/>
+                      5. Use your phone number above
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      try {
+                        const { error } = await supabase.from('orders').insert({
+                          phone: phoneNumber,
+                          total: cartTotal,
+                          items: cart.map(({ id, name, price, qty }) => ({ id, name, price, qty })),
+                          status: 'pending_manual_payment',
+                          created_at: new Date().toISOString(),
+                        });
+                        if (error) console.error('Error saving order:', error);
+                      } catch (e) {
+                        console.error('Unexpected error saving order:', e);
+                      }
+                      alert('Thank you! We will confirm your payment and start preparing your order.');
+                      setCart([]);
+                      setIsCartOpen(false);
+                    }}
+                    disabled={!phoneNumber || cartTotal <= 0}
+                    className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2 disabled:opacity-50"
+                  >
+                    I have paid
+                  </button>
+                </div>
                 <div className="mt-3 flex justify-center gap-2 opacity-50">
-                  <span className="text-xs text-gray-400">Secured by Daraja API</span>
+                  <span className="text-xs text-gray-400">Pay manually via M-Pesa till number 6920615</span>
                 </div>
               </div>
             </motion.div>
@@ -248,12 +249,18 @@ const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [menuItems, setMenuItems] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
-      const { data, error } = await supabase.from('menu_items').select('*').order('id');
-      if (!error) { setMenuItems(data); setLoading(false); }
+      const [{ data: menuData, error: menuError }, { data: orderData, error: orderError }] = await Promise.all([
+        supabase.from('menu_items').select('*').order('id'),
+        supabase.from('orders').select('*').order('created_at', { ascending: false }),
+      ]);
+      if (!menuError) setMenuItems(menuData || []);
+      if (!orderError) setOrders(orderData || []);
+      setLoading(false);
     };
     if (isAuthenticated) loadData();
   }, [isAuthenticated]);
@@ -263,14 +270,66 @@ const AdminDashboard = () => {
     if (password === '2024') setIsAuthenticated(true); else alert('Wrong PIN');
   };
 
+  const refreshData = async () => {
+    const [{ data: menuData, error: menuError }, { data: orderData, error: orderError }] = await Promise.all([
+      supabase.from('menu_items').select('*').order('id'),
+      supabase.from('orders').select('*').order('created_at', { ascending: false }),
+    ]);
+    if (!menuError) setMenuItems(menuData || []);
+    if (!orderError) setOrders(orderData || []);
+  };
+
   const updatePrice = async (id, newPrice) => {
     const { error } = await supabase.from('menu_items').update({ price: newPrice }).eq('id', id);
-    if (!error) alert('Price Updated!');
+    if (!error) {
+      alert('Price Updated!');
+      refreshData();
+    }
   };
 
   const toggleStock = async (id, currentStatus) => {
     const { error } = await supabase.from('menu_items').update({ available: !currentStatus }).eq('id', id);
     if (!error) setMenuItems(prev => prev.map(i => i.id === id ? { ...i, available: !currentStatus } : i));
+  };
+
+  const deleteItem = async (id) => {
+    if (!window.confirm('Delete this menu item?')) return;
+    const { error } = await supabase.from('menu_items').delete().eq('id', id);
+    if (!error) {
+      setMenuItems(prev => prev.filter(i => i.id !== id));
+    }
+  };
+
+  const addItem = async () => {
+    const name = window.prompt('Item name');
+    if (!name) return;
+    const priceStr = window.prompt('Price (KES)');
+    if (!priceStr) return;
+    const price = Number(priceStr);
+    const category = window.prompt('Category (fries, mains, snacks, drinks, combos)');
+    if (!category) return;
+    const img = window.prompt('Image path (e.g. /food/my_image.jpg)') || '';
+    const desc = window.prompt('Description') || '';
+
+    const { error } = await supabase.from('menu_items').insert({
+      name,
+      price,
+      category,
+      img,
+      desc,
+      available: true,
+    });
+    if (!error) {
+      alert('Item added');
+      refreshData();
+    }
+  };
+
+  const updateOrderStatus = async (id, status) => {
+    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+    if (!error) {
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+    }
   };
 
   if (!isAuthenticated) return (
@@ -293,26 +352,129 @@ const AdminDashboard = () => {
         <div className="flex items-center gap-3"><Logo /><h2 className="font-bold text-gray-900">Admin Dashboard</h2></div>
         <button onClick={() => setIsAuthenticated(false)} className="text-sm font-bold text-red-600 bg-red-50 px-4 py-2 rounded-lg">Log Out</button>
       </div>
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-lg">Menu Items</h3>
+          <button
+            onClick={addItem}
+            className="px-3 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold"
+          >
+            + Add Item
+          </button>
+        </div>
         {loading ? <p>Loading...</p> : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
             <table className="w-full text-left">
               <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
-                <tr><th className="p-4">Item</th><th className="p-4">Price</th><th className="p-4 text-center">Stock</th><th className="p-4">Action</th></tr>
+                <tr>
+                  <th className="p-4">Item</th>
+                  <th className="p-4">Price</th>
+                  <th className="p-4 text-center">Stock</th>
+                  <th className="p-4">Action</th>
+                </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {menuItems.map(item => (
                   <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="p-4 font-bold text-sm text-gray-700">{item.name} <span className="text-gray-400 font-normal ml-2">({item.category})</span></td>
-                    <td className="p-4"><input type="number" defaultValue={item.price} id={`price-${item.id}`} className="w-20 p-2 border rounded bg-white font-mono" /></td>
-                    <td className="p-4 text-center"><button onClick={() => toggleStock(item.id, item.available)} className={`px-3 py-1 rounded-full text-xs font-bold ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{item.available ? 'In Stock' : 'Sold Out'}</button></td>
-                    <td className="p-4"><button onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)} className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"><Save size={16}/></button></td>
+                    <td className="p-4 font-bold text-sm text-gray-700">
+                      {item.name}
+                      <span className="text-gray-400 font-normal ml-2">({item.category})</span>
+                    </td>
+                    <td className="p-4">
+                      <input
+                        type="number"
+                        defaultValue={item.price}
+                        id={`price-${item.id}`}
+                        className="w-20 p-2 border rounded bg-white font-mono"
+                      />
+                    </td>
+                    <td className="p-4 text-center">
+                      <button
+                        onClick={() => toggleStock(item.id, item.available)}
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+                      >
+                        {item.available ? 'In Stock' : 'Sold Out'}
+                      </button>
+                    </td>
+                    <td className="p-4 flex gap-2">
+                      <button
+                        onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)}
+                        className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"
+                      >
+                        <Save size={16} />
+                      </button>
+                      <button
+                        onClick={() => deleteItem(item.id)}
+                        className="bg-red-100 text-red-600 px-3 py-2 rounded text-xs font-bold"
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
+
+        {/* Orders table */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200">
+            <h3 className="font-bold text-lg">Recent Orders</h3>
+          </div>
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
+              <tr>
+                <th className="p-3">Time</th>
+                <th className="p-3">Phone</th>
+                <th className="p-3">Total (KES)</th>
+                <th className="p-3">Status</th>
+                <th className="p-3">Items</th>
+                <th className="p-3">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {orders.length === 0 && (
+                <tr>
+                  <td className="p-4 text-gray-400 text-center" colSpan={6}>No orders yet.</td>
+                </tr>
+              )}
+              {orders.map(order => (
+                <tr key={order.id} className="align-top">
+                  <td className="p-3 text-xs text-gray-500">
+                    {order.created_at ? new Date(order.created_at).toLocaleString() : ''}
+                  </td>
+                  <td className="p-3 font-mono text-xs">{order.phone}</td>
+                  <td className="p-3 font-bold">{order.total}</td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${order.status === 'paid' ? 'bg-green-100 text-green-700' : order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="p-3 text-xs text-gray-600 max-w-xs">
+                    {Array.isArray(order.items) && order.items.map(i => (
+                      <div key={i.id}>{i.qty} x {i.name}</div>
+                    ))}
+                  </td>
+                  <td className="p-3 space-x-2">
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'paid')}
+                      className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 font-bold"
+                    >
+                      Mark Paid
+                    </button>
+                    <button
+                      onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                      className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 font-bold"
+                    >
+                      Cancel
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
