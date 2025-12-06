@@ -240,6 +240,9 @@ const CustomerMenu = () => {
           </>
         )}
       </AnimatePresence>
+      <footer className="mt-6 py-4 text-center text-xs text-gray-400">
+        © {new Date().getFullYear()} Snack Have Hun. All rights reserved.
+      </footer>
     </div>
   );
 };
@@ -251,6 +254,7 @@ const AdminDashboard = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeAdminTab, setActiveAdminTab] = useState('menu');
 
   useEffect(() => {
     const loadData = async () => {
@@ -267,7 +271,7 @@ const AdminDashboard = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === '2024') setIsAuthenticated(true); else alert('Wrong PIN');
+    if (password === '2025') setIsAuthenticated(true); else alert('Wrong PIN');
   };
 
   const refreshData = async () => {
@@ -346,136 +350,162 @@ const AdminDashboard = () => {
     </div>
   );
 
-  return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-0 flex flex-col">
       <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-3"><Logo /><h2 className="font-bold text-gray-900">Admin Dashboard</h2></div>
         <button onClick={() => setIsAuthenticated(false)} className="text-sm font-bold text-red-600 bg-red-50 px-4 py-2 rounded-lg">Log Out</button>
       </div>
-      <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-lg">Menu Items</h3>
+      <div className="max-w-5xl mx-auto px-4 py-8 flex gap-6">
+        {/* Side nav */}
+        <div className="w-32 flex flex-col gap-2 text-sm">
           <button
-            onClick={addItem}
-            className="px-3 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold"
+            onClick={() => setActiveAdminTab('menu')}
+            className={`px-3 py-2 rounded-lg font-bold text-left ${activeAdminTab === 'menu' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-200'}`}
           >
-            + Add Item
+            Menu
+          </button>
+          <button
+            onClick={() => setActiveAdminTab('orders')}
+            className={`px-3 py-2 rounded-lg font-bold text-left ${activeAdminTab === 'orders' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-200'}`}
+          >
+            Orders
           </button>
         </div>
-        {loading ? <p>Loading...</p> : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-            <table className="w-full text-left">
-              <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
-                <tr>
-                  <th className="p-4">Item</th>
-                  <th className="p-4">Price</th>
-                  <th className="p-4 text-center">Stock</th>
-                  <th className="p-4">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {menuItems.map(item => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="p-4 font-bold text-sm text-gray-700">
-                      {item.name}
-                      <span className="text-gray-400 font-normal ml-2">({item.category})</span>
-                    </td>
-                    <td className="p-4">
-                      <input
-                        type="number"
-                        defaultValue={item.price}
-                        id={`price-${item.id}`}
-                        className="w-20 p-2 border rounded bg-white font-mono"
-                      />
-                    </td>
-                    <td className="p-4 text-center">
-                      <button
-                        onClick={() => toggleStock(item.id, item.available)}
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
-                      >
-                        {item.available ? 'In Stock' : 'Sold Out'}
-                      </button>
-                    </td>
-                    <td className="p-4 flex gap-2">
-                      <button
-                        onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)}
-                        className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"
-                      >
-                        <Save size={16} />
-                      </button>
-                      <button
-                        onClick={() => deleteItem(item.id)}
-                        className="bg-red-100 text-red-600 px-3 py-2 rounded text-xs font-bold"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
 
-        {/* Orders table */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200">
-            <h3 className="font-bold text-lg">Recent Orders</h3>
-          </div>
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
-              <tr>
-                <th className="p-3">Time</th>
-                <th className="p-3">Phone</th>
-                <th className="p-3">Total (KES)</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Items</th>
-                <th className="p-3">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {orders.length === 0 && (
-                <tr>
-                  <td className="p-4 text-gray-400 text-center" colSpan={6}>No orders yet.</td>
-                </tr>
+        {/* Main content */}
+        <div className="flex-1 space-y-8">
+          {activeAdminTab === 'menu' && (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-lg">Menu Items</h3>
+                <button
+                  onClick={addItem}
+                  className="px-3 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold"
+                >
+                  + Add Item
+                </button>
+              </div>
+              {loading ? <p>Loading...</p> : (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
+                      <tr>
+                        <th className="p-4">Item</th>
+                        <th className="p-4">Price</th>
+                        <th className="p-4 text-center">Stock</th>
+                        <th className="p-4">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {menuItems.map(item => (
+                        <tr key={item.id} className="hover:bg-gray-50">
+                          <td className="p-4 font-bold text-sm text-gray-700">
+                            {item.name}
+                            <span className="text-gray-400 font-normal ml-2">({item.category})</span>
+                          </td>
+                          <td className="p-4">
+                            <input
+                              type="number"
+                              defaultValue={item.price}
+                              id={`price-${item.id}`}
+                              className="w-20 p-2 border rounded bg-white font-mono"
+                            />
+                          </td>
+                          <td className="p-4 text-center">
+                            <button
+                              onClick={() => toggleStock(item.id, item.available)}
+                              className={`px-3 py-1 rounded-full text-xs font-bold ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+                            >
+                              {item.available ? 'In Stock' : 'Sold Out'}
+                            </button>
+                          </td>
+                          <td className="p-4 flex gap-2">
+                            <button
+                              onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)}
+                              className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"
+                            >
+                              <Save size={16} />
+                            </button>
+                            <button
+                              onClick={() => deleteItem(item.id)}
+                              className="bg-red-100 text-red-600 px-3 py-2 rounded text-xs font-bold"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
-              {orders.map(order => (
-                <tr key={order.id} className="align-top">
-                  <td className="p-3 text-xs text-gray-500">
-                    {order.created_at ? new Date(order.created_at).toLocaleString() : ''}
-                  </td>
-                  <td className="p-3 font-mono text-xs">{order.phone}</td>
-                  <td className="p-3 font-bold">{order.total}</td>
-                  <td className="p-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${order.status === 'paid' ? 'bg-green-100 text-green-700' : order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="p-3 text-xs text-gray-600 max-w-xs">
-                    {Array.isArray(order.items) && order.items.map(i => (
-                      <div key={i.id}>{i.qty} x {i.name}</div>
-                    ))}
-                  </td>
-                  <td className="p-3 space-x-2">
-                    <button
-                      onClick={() => updateOrderStatus(order.id, 'paid')}
-                      className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 font-bold"
-                    >
-                      Mark Paid
-                    </button>
-                    <button
-                      onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                      className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 font-bold"
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            </>
+          )}
+
+          {activeAdminTab === 'orders' && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200">
+                <h3 className="font-bold text-lg">Recent Orders</h3>
+              </div>
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
+                  <tr>
+                    <th className="p-3">Time</th>
+                    <th className="p-3">Phone</th>
+                    <th className="p-3">Total (KES)</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Items</th>
+                    <th className="p-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {orders.length === 0 && (
+                    <tr>
+                      <td className="p-4 text-gray-400 text-center" colSpan={6}>No orders yet.</td>
+                    </tr>
+                  )}
+                  {orders.map(order => (
+                    <tr key={order.id} className="align-top">
+                      <td className="p-3 text-xs text-gray-500">
+                        {order.created_at ? new Date(order.created_at).toLocaleString() : ''}
+                      </td>
+                      <td className="p-3 font-mono text-xs">{order.phone}</td>
+                      <td className="p-3 font-bold">{order.total}</td>
+                      <td className="p-3">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${order.status === 'paid' ? 'bg-green-100 text-green-700' : order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="p-3 text-xs text-gray-600 max-w-xs">
+                        {Array.isArray(order.items) && order.items.map(i => (
+                          <div key={i.id}>{i.qty} x {i.name}</div>
+                        ))}
+                      </td>
+                      <td className="p-3 space-x-2">
+                        <button
+                          onClick={() => updateOrderStatus(order.id, 'paid')}
+                          className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 font-bold"
+                        >
+                          Mark Paid
+                        </button>
+                        <button
+                          onClick={() => updateOrderStatus(order.id, 'cancelled')}
+                          className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 font-bold"
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
+      <footer className="py-4 text-center text-xs text-gray-400 border-t border-gray-200">
+        © {new Date().getFullYear()} Snack Have Hun. All rights reserved.
+      </footer>
     </div>
   );
 };
