@@ -240,9 +240,41 @@ const CustomerMenu = () => {
           </>
         )}
       </AnimatePresence>
-      <footer className="mt-6 py-4 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} Snack Have Hun. All rights reserved.
+      <footer className="mt-6 py-6 text-center text-sm text-gray-500">
+        <div className="flex items-center justify-center gap-4 mb-2">
+          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:bg-orange-50" title="Instagram" aria-label="Instagram">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-pink-500">
+              <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.5"/>
+              <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="1.5"/>
+              <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" />
+            </svg>
+          </a>
+
+          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:bg-green-50" title="WhatsApp" aria-label="WhatsApp">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 11.5a9.38 9.38 0 0 1-1.3 4.6l.9 3.3-3.4-.9A9.8 9.8 0 1 1 21 11.5z" stroke="currentColor" strokeWidth="1.2" fill="currentColor" />
+              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff" />
+            </svg>
+          </a>
+
+          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:bg-blue-50" title="Email" aria-label="Email">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M21 6.5l-9 7-9-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </a>
+
+          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:bg-black/5" title="TikTok" aria-label="TikTok">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+          </a>
+        </div>
+        <div className="text-xs text-gray-400">© {new Date().getFullYear()} Snack Have Hun. All rights reserved.</div>
       </footer>
+
+
     </div>
   );
 };
@@ -603,6 +635,31 @@ const AdminDashboard = () => {
         </div>
       </div>
       <footer className="mt-10 py-4 text-center text-xs text-gray-400">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <a href="#" title="Instagram" aria-label="Instagram" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.2"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+          </a>
+          <a href="#" title="WhatsApp" aria-label="WhatsApp" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 11.5a9.38 9.38 0 0 1-1.3 4.6l.9 3.3-3.4-.9A9.8 9.8 0 1 1 21 11.5z" stroke="currentColor" strokeWidth="1" fill="currentColor" />
+            </svg>
+          </a>
+          <a href="#" title="Email" aria-label="Email" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" stroke="currentColor" strokeWidth="1"/>
+              <path d="M21 6.5l-9 7-9-7" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </a>
+          <a href="#" title="TikTok" aria-label="TikTok" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" stroke="currentColor" strokeWidth="1"/>
+              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" stroke="currentColor" strokeWidth="1"/>
+            </svg>
+          </a>
+        </div>
         © {new Date().getFullYear()} Snack Have Hun Admin Panel. All rights reserved.
       </footer>
     </div>
