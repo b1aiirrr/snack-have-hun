@@ -242,45 +242,45 @@ const CustomerMenu = () => {
       </AnimatePresence>
       <footer className="mt-6 py-6 text-center text-sm text-gray-500">
         <div className="flex items-center justify-center gap-4 mb-2">
-          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:shadow-md" title="Instagram" aria-label="Instagram">
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="igGrad" x1="0%" x2="100%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="#f58529" />
-                  <stop offset="50%" stopColor="#dd2a7b" />
-                  <stop offset="100%" stopColor="#8134af" />
-                </linearGradient>
-              </defs>
-              <rect x="3" y="3" width="18" height="18" rx="5" fill="url(#igGrad)" />
-              <circle cx="12" cy="12" r="3.2" fill="white" />
-              <circle cx="17.5" cy="6.5" r="0.6" fill="white" />
+          {/* WhatsApp */}
+          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="WhatsApp" aria-label="WhatsApp">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill="currentColor"/>
+              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff"/>
             </svg>
           </a>
-
-          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:shadow-md" title="WhatsApp" aria-label="WhatsApp">
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#25D366" d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" />
-              <path fill="#fff" d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" />
+          {/* Instagram */}
+          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Instagram" aria-label="Instagram">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor"/>
+              <circle cx="12" cy="12" r="3.2" fill="#fff"/>
+              <circle cx="17.5" cy="6.5" r="0.5" fill="#fff"/>
             </svg>
           </a>
-
-          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:shadow-md" title="Email" aria-label="Email">
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="6" width="18" height="12" rx="2" fill="#EA4335" />
-              <path d="M3 6l9 7 9-7" fill="#ffffff" opacity="0.95" />
+          {/* X (Twitter) */}
+          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="X" aria-label="X">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M23 4.01a10.9 10.9 0 0 1-3.14.86A4.48 4.48 0 0 0 22.4 2a9.05 9.05 0 0 1-2.88 1.1A4.52 4.52 0 0 0 11.07 6.3a12.8 12.8 0 0 1-9.29-4.7 4.5 4.5 0 0 0 1.4 6.03A4.42 4.42 0 0 1 2 7.7v.06a4.51 4.51 0 0 0 3.63 4.42 4.52 4.52 0 0 1-2.04.08 4.5 4.5 0 0 0 4.2 3.12A9.06 9.06 0 0 1 1 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.84-6.88 12.84-12.84v-.59A9.2 9.2 0 0 0 23 4.01z" fill="#fff"/>
             </svg>
           </a>
-
-          <a href="#" className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm flex items-center gap-2 hover:shadow-md" title="TikTok" aria-label="TikTok">
+          {/* Email */}
+          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Email" aria-label="Email">
             <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#69C9D0" />
-              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#EE1D52" opacity="0.95" />
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#010101" opacity="0.9" />
+              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" fill="currentColor"/>
+              <path d="M21 6.5l-9 7-9-7" fill="#fff"/>
+            </svg>
+          </a>
+          {/* TikTok */}
+          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="TikTok" aria-label="TikTok">
+            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#fff"/>
+              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#fff"/>
             </svg>
           </a>
         </div>
         <div className="text-xs text-gray-400">© {new Date().getFullYear()} Snack Have Hun. All rights reserved.</div>
       </footer>
+
 
 
     </div>
