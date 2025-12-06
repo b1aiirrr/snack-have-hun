@@ -350,7 +350,8 @@ const AdminDashboard = () => {
     </div>
   );
 
-    <div className="min-h-screen bg-gray-50 pb-0 flex flex-col">
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-3"><Logo /><h2 className="font-bold text-gray-900">Admin Dashboard</h2></div>
         <button onClick={() => setIsAuthenticated(false)} className="text-sm font-bold text-red-600 bg-red-50 px-4 py-2 rounded-lg">Log Out</button>
@@ -503,9 +504,6 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-      <footer className="py-4 text-center text-xs text-gray-400 border-t border-gray-200">
-        © {new Date().getFullYear()} Snack Have Hun. All rights reserved.
-      </footer>
     </div>
   );
 };
