@@ -644,27 +644,49 @@ const AdminDashboard = () => {
       </div>
       <footer className="mt-10 py-4 text-center text-xs text-gray-400">
         <div className="flex items-center justify-center gap-3 mb-2">
-          <a href="#" title="Instagram" aria-label="Instagram" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.2"/>
-              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.2"/>
+          <a href="#" title="Instagram" aria-label="Instagram" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="igGradAdmin" x1="0%" x2="100%" y1="0%" y2="100%">
+                  <stop offset="0%" stopColor="#FEDA75" />
+                  <stop offset="25%" stopColor="#FA7E1E" />
+                  <stop offset="50%" stopColor="#D62976" />
+                  <stop offset="75%" stopColor="#962FBF" />
+                  <stop offset="100%" stopColor="#4F5BD5" />
+                </linearGradient>
+              </defs>
+              <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#igGradAdmin)" />
+              <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="#fff" />
+              <circle cx="17.2" cy="6.8" r="0.7" fill="#fff" />
             </svg>
           </a>
-          <a href="#" title="WhatsApp" aria-label="WhatsApp" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 11.5a9.38 9.38 0 0 1-1.3 4.6l.9 3.3-3.4-.9A9.8 9.8 0 1 1 21 11.5z" stroke="currentColor" strokeWidth="1" fill="currentColor" />
+
+          <a href="#" title="WhatsApp" aria-label="WhatsApp" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#25D366" d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" />
+              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff" />
             </svg>
           </a>
-          <a href="#" title="Email" aria-label="Email" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" stroke="currentColor" strokeWidth="1"/>
-              <path d="M21 6.5l-9 7-9-7" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+
+          <a href="#" title="Email" aria-label="Email" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="gMailGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+                  <stop offset="0%" stopColor="#4285F4" />
+                  <stop offset="50%" stopColor="#EA4335" />
+                  <stop offset="100%" stopColor="#FBBC05" />
+                </linearGradient>
+              </defs>
+              <rect x="3" y="5" width="18" height="14" rx="2" fill="url(#gMailGrad)" />
+              <path d="M3 7l9 7 9-7" fill="#fff" opacity="0.95" />
             </svg>
           </a>
-          <a href="#" title="TikTok" aria-label="TikTok" className="text-gray-400 hover:text-orange-600 p-2 rounded-md">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" stroke="currentColor" strokeWidth="1"/>
-              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" stroke="currentColor" strokeWidth="1"/>
+
+          <a href="#" title="TikTok" aria-label="TikTok" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#69C9D0" />
+              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#EE1D52" opacity="0.95" />
+              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#010101" opacity="0.9" />
             </svg>
           </a>
         </div>
