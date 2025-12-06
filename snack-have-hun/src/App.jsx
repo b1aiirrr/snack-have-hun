@@ -124,7 +124,7 @@ const CustomerMenu = () => {
   return (
     <div className="min-h-screen bg-orange-50 font-sans text-gray-800 pb-20">
       <nav className="sticky top-0 z-40 bg-white shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-xl hidden sm:block text-orange-950">Snack Have Hun</h1></div>
+        <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-lg text-orange-950">Snack Have Hun</h1></div>
         <div className="flex gap-3">
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 hover:bg-orange-50 rounded-full">
             <ShoppingCart className="text-orange-700" />
