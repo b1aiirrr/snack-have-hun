@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save, Download } from 'lucide-react'; // Added Download Icon
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
-import SocialFooter from './components/SocialFooter';
+import axios from 'axios';
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {
@@ -17,23 +17,15 @@ const FoodImage = ({ src, alt }) => {
           <span className="text-[10px] font-bold uppercase">{alt}</span>
         </div>
       ) : (
-        <img 
-          src={src} 
-          alt={alt} 
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
-          onError={() => setError(true)} 
-        />
+        <img src={src} alt={alt} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onError={() => setError(true)} />
       )}
     </div>
   );
 };
 
 const Logo = () => (
-  <div className="relative flex items-center">
-    <div className="relative w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-3 border-2 border-white">
-      <span className="text-white font-black text-xl italic tracking-tighter">SHH</span>
-    </div>
-    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow" />
+  <div className="relative w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-3 border-2 border-white">
+    <span className="text-white font-black text-xl italic tracking-tighter">SHH</span>
   </div>
 );
 
@@ -46,7 +38,6 @@ const HERO_IMAGES = {
   combos: '/food/hero_combos.jpg'
 };
 
-// --- TITLES & ICONS ---
 const CATEGORY_TITLES = {
   fries: 'Fries & Chips',
   mains: 'Main Course',
@@ -63,7 +54,36 @@ const CATEGORY_ICONS = {
   combos: '🌟'
 };
 
-// --- STATIC MENU (For Instant Load) ---
+// --- INSTALL BUTTON COMPONENT ---
+const InstallButton = () => {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') setDeferredPrompt(null);
+  };
+
+  if (!deferredPrompt) return null; // Hidden if already installed or not supported
+
+  return (
+    <button onClick={handleInstall} className="flex items-center gap-2 bg-black text-white px-3 py-2 rounded-full text-xs font-bold animate-pulse hover:bg-gray-800 transition">
+      <Download size={14} /> Install App
+    </button>
+  );
+};
+
+// --- STATIC MENU ---
 const INITIAL_MENU = [
   {
     id: 'fries', name: 'Fries & Chips', icon: '🍟', hero: '/food/hero_fries.jpg',
@@ -77,7 +97,6 @@ const INITIAL_MENU = [
       { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky and crispy.', img: '/food/potato_wedges.jpg', available: true },
     ]
   },
-  // ... (Other categories will load from DB, but this keeps the UI stable)
 ];
 
 // --- 1. CUSTOMER MENU ---
@@ -87,13 +106,12 @@ const CustomerMenu = () => {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
   
-  // FETCH FROM DATABASE
   useEffect(() => {
     const fetchMenu = async () => {
       const { data, error } = await supabase.from('menu_items').select('*').order('id');
-      if (error) console.error('Error fetching menu:', error);
-      else if (data && data.length > 0) {
+      if (!error && data && data.length > 0) {
         const categories = ['fries', 'mains', 'snacks', 'drinks', 'combos'];
         const grouped = categories.map(cat => ({
           id: cat,
@@ -113,6 +131,7 @@ const CustomerMenu = () => {
       const existing = prev.find(i => i.id === item.id);
       return existing ? prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i) : [...prev, { ...item, qty: 1 }];
     });
+    setIsCartOpen(true);
   };
 
   const updateQty = (id, delta) => {
@@ -122,11 +141,53 @@ const CustomerMenu = () => {
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const activeCatData = menu.find(c => c.id === activeCategory) || menu[0];
 
+  const handlePayment = async () => {
+    if (!phoneNumber) return alert('Please enter your phone number');
+    
+    setIsProcessing(true);
+
+    try {
+      console.log("Saving order to database...");
+      
+      const { error } = await supabase.from('orders').insert({
+        phone: phoneNumber,
+        total: cartTotal,
+        items: cart.map(({ id, name, price, qty }) => ({ id, name, price, qty })),
+        status: 'pending_payment',
+        created_at: new Date().toISOString(),
+      });
+
+      if (error) console.error("Supabase Error:", error);
+
+      // Trigger Daraja API
+      const response = await axios.post('/api/pay', {
+        phoneNumber: phoneNumber,
+        amount: cartTotal
+      });
+
+      if (response.data.ResponseCode === "0") {
+        alert(`✅ STK Push Sent to ${phoneNumber}! Enter PIN to pay KES ${cartTotal}.`);
+        setCart([]); 
+        setIsCartOpen(false);
+      } else {
+        alert("❌ Safaricom Error: " + (response.data.errorMessage || "Try again."));
+      }
+    } catch (error) {
+      console.error(error);
+      alert("❌ Connection Error. Please try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-orange-50 font-sans text-gray-800 pb-20">
-      <nav className="sticky top-0 z-40 bg-white shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-lg text-orange-950">Snack Have Hun</h1></div>
-        <div className="flex gap-3">
+      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-xl hidden sm:block text-orange-950">Snack Have Hun</h1></div>
+        <div className="flex gap-3 items-center">
+          {/* NEW: Install Button (Only shows if installable) */}
+          <InstallButton />
+          
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 hover:bg-orange-50 rounded-full">
             <ShoppingCart className="text-orange-700" />
             {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{cart.reduce((a,b) => a + b.qty, 0)}</span>}
@@ -195,95 +256,17 @@ const CustomerMenu = () => {
               <div className="border-t pt-4 mt-4">
                 <div className="flex justify-between text-xl font-black mb-4"><span>Total</span><span className="text-orange-600">KES {cartTotal}</span></div>
                 <input type="tel" placeholder="0712..." value={phoneNumber} onChange={e=>setPhoneNumber(e.target.value)} className="w-full bg-gray-100 p-4 rounded-xl mb-3 border border-gray-200"/>
-                
-                {/* MANUAL TILL NUMBER PAYMENT */}
-                <div className="space-y-3">
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-900">
-                    <p className="font-bold">Pay via M-Pesa Till Number</p>
-                    <p className="mt-1">
-                      1. Open <span className="font-semibold">M-Pesa</span> on your phone<br/>
-                      2. Lipa na M-Pesa → Buy Goods and Services<br/>
-                      3. Till Number: <span className="font-mono font-bold">6920615</span><br/>
-                      4. Amount: <span className="font-mono font-bold">KES {cartTotal}</span><br/>
-                      5. Use your phone number above
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={async () => {
-                      try {
-                        const { error } = await supabase.from('orders').insert({
-                          phone: phoneNumber,
-                          total: cartTotal,
-                          items: cart.map(({ id, name, price, qty }) => ({ id, name, price, qty })),
-                          status: 'pending_manual_payment',
-                          created_at: new Date().toISOString(),
-                        });
-                        if (error) console.error('Error saving order:', error);
-                      } catch (e) {
-                        console.error('Unexpected error saving order:', e);
-                      }
-                      alert('Thank you! We will confirm your payment and start preparing your order.');
-                      setCart([]);
-                      setIsCartOpen(false);
-                    }}
-                    disabled={!phoneNumber || cartTotal <= 0}
-                    className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2 disabled:opacity-50"
-                  >
-                    I have paid
-                  </button>
-                </div>
+                <button onClick={handlePayment} disabled={isProcessing} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2">
+                  {isProcessing ? 'Processing...' : <>Pay with M-Pesa <CheckCircle size={20}/></>}
+                </button>
                 <div className="mt-3 flex justify-center gap-2 opacity-50">
-                  <span className="text-xs text-gray-400">Pay manually via M-Pesa till number 6920615</span>
+                  <span className="text-xs text-gray-400">Secured by Daraja API</span>
                 </div>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
-      <footer className="mt-6 py-6 text-center text-sm text-gray-500">
-        <div className="flex items-center justify-center gap-4 mb-2">
-          {/* WhatsApp */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="WhatsApp" aria-label="WhatsApp">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill="currentColor"/>
-              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff"/>
-            </svg>
-          </a>
-          {/* Instagram */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Instagram" aria-label="Instagram">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor"/>
-              <circle cx="12" cy="12" r="3.2" fill="#fff"/>
-              <circle cx="17.5" cy="6.5" r="0.5" fill="#fff"/>
-            </svg>
-          </a>
-          {/* X (Twitter) */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="X" aria-label="X">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M23 4.01a10.9 10.9 0 0 1-3.14.86A4.48 4.48 0 0 0 22.4 2a9.05 9.05 0 0 1-2.88 1.1A4.52 4.52 0 0 0 11.07 6.3a12.8 12.8 0 0 1-9.29-4.7 4.5 4.5 0 0 0 1.4 6.03A4.42 4.42 0 0 1 2 7.7v.06a4.51 4.51 0 0 0 3.63 4.42 4.52 4.52 0 0 1-2.04.08 4.5 4.5 0 0 0 4.2 3.12A9.06 9.06 0 0 1 1 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.84-6.88 12.84-12.84v-.59A9.2 9.2 0 0 0 23 4.01z" fill="#fff"/>
-            </svg>
-          </a>
-          {/* Email */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Email" aria-label="Email">
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" fill="currentColor"/>
-              <path d="M21 6.5l-9 7-9-7" fill="#fff"/>
-            </svg>
-          </a>
-          {/* TikTok */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="TikTok" aria-label="TikTok">
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#fff"/>
-              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#fff"/>
-            </svg>
-          </a>
-        </div>
-        <div className="text-xs text-gray-400">© {new Date().getFullYear()} Snack Have Hun. All rights reserved.</div>
-      </footer>
-
-
-
     </div>
   );
 };
@@ -293,107 +276,29 @@ const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [menuItems, setMenuItems] = useState([]);
-  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeAdminTab, setActiveAdminTab] = useState('menu');
-  const [newItem, setNewItem] = useState({
-    name: '',
-    price: '',
-    category: 'fries',
-    img: '',
-    desc: '',
-  });
-  const [addMessage, setAddMessage] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
-      const [{ data: menuData, error: menuError }, { data: orderData, error: orderError }] = await Promise.all([
-        supabase.from('menu_items').select('*').order('id'),
-        supabase.from('orders').select('*').order('created_at', { ascending: false }),
-      ]);
-      if (!menuError) setMenuItems(menuData || []);
-      if (!orderError) setOrders(orderData || []);
-      setLoading(false);
+      const { data, error } = await supabase.from('menu_items').select('*').order('id');
+      if (!error) { setMenuItems(data); setLoading(false); }
     };
     if (isAuthenticated) loadData();
   }, [isAuthenticated]);
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (password === '2025') setIsAuthenticated(true); else alert('Wrong PIN');
-  };
-
-  const refreshData = async () => {
-    const [{ data: menuData, error: menuError }, { data: orderData, error: orderError }] = await Promise.all([
-      supabase.from('menu_items').select('*').order('id'),
-      supabase.from('orders').select('*').order('created_at', { ascending: false }),
-    ]);
-    if (!menuError) setMenuItems(menuData || []);
-    if (!orderError) setOrders(orderData || []);
+    if (password === '2024') setIsAuthenticated(true); else alert('Wrong PIN');
   };
 
   const updatePrice = async (id, newPrice) => {
     const { error } = await supabase.from('menu_items').update({ price: newPrice }).eq('id', id);
-    if (!error) {
-      refreshData();
-    }
+    if (!error) alert('Price Updated!');
   };
+
   const toggleStock = async (id, currentStatus) => {
     const { error } = await supabase.from('menu_items').update({ available: !currentStatus }).eq('id', id);
     if (!error) setMenuItems(prev => prev.map(i => i.id === id ? { ...i, available: !currentStatus } : i));
-  };
-
-  const deleteItem = async (id) => {
-    if (!window.confirm('Delete this menu item?')) return;
-    const { error } = await supabase.from('menu_items').delete().eq('id', id);
-    if (!error) {
-      setMenuItems(prev => prev.filter(i => i.id !== id));
-    }
-  };
-
-  const addItem = async () => {
-    setAddMessage('');
-    if (!newItem.name || !newItem.price || !newItem.category) {
-      setAddMessage('Please fill in name, price and category.');
-      return;
-    }
-
-    const price = Number(newItem.price);
-    if (Number.isNaN(price) || price <= 0) {
-      setAddMessage('Price must be a positive number.');
-      return;
-    }
-
-    const { error } = await supabase.from('menu_items').insert({
-      name: newItem.name,
-      price,
-      category: newItem.category,
-      img: newItem.img || '',
-      desc: newItem.desc || '',
-      available: true,
-    });
-    if (error) {
-      console.error('Error adding item:', error);
-      setAddMessage('Error adding item. Please try again.');
-      return;
-    }
-
-    setAddMessage('Item added successfully.');
-    setNewItem({
-      name: '',
-      price: '',
-      category: 'fries',
-      img: '',
-      desc: '',
-    });
-    refreshData();
-  };
-
-  const updateOrderStatus = async (id, status) => {
-    const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-    if (!error) {
-      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-    }
   };
 
   if (!isAuthenticated) return (
@@ -416,283 +321,27 @@ const AdminDashboard = () => {
         <div className="flex items-center gap-3"><Logo /><h2 className="font-bold text-gray-900">Admin Dashboard</h2></div>
         <button onClick={() => setIsAuthenticated(false)} className="text-sm font-bold text-red-600 bg-red-50 px-4 py-2 rounded-lg">Log Out</button>
       </div>
-      <div className="max-w-5xl mx-auto px-4 py-8 flex gap-6">
-        {/* Side nav */}
-        <div className="w-32 flex flex-col gap-2 text-sm">
-          <button
-            onClick={() => setActiveAdminTab('menu')}
-            className={`px-3 py-2 rounded-lg font-bold text-left ${activeAdminTab === 'menu' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-200'}`}
-          >
-            Menu
-          </button>
-          <button
-            onClick={() => setActiveAdminTab('orders')}
-            className={`px-3 py-2 rounded-lg font-bold text-left ${activeAdminTab === 'orders' ? 'bg-orange-600 text-white' : 'bg-white text-gray-700 border border-gray-200'}`}
-          >
-            Orders
-          </button>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 space-y-8">
-          {activeAdminTab === 'menu' && (
-            <>
-              <div className="space-y-4 mb-6">
-                <h3 className="font-bold text-lg">Add New Menu Item</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-4 rounded-xl border border-gray-200">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-500 uppercase">
-                      Food Name
-                    </label>
-                    <input
-                      type="text"
-                      value={newItem.name}
-                      onChange={e => setNewItem({ ...newItem, name: e.target.value })}
-                      className="w-full p-2 border rounded bg-gray-50"
-                      placeholder="e.g. Classic Fries"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-500 uppercase">
-                      Price (KES)
-                    </label>
-                    <input
-                      type="number"
-                      value={newItem.price}
-                      onChange={e => setNewItem({ ...newItem, price: e.target.value })}
-                      className="w-full p-2 border rounded bg-gray-50"
-                      placeholder="e.g. 150"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-500 uppercase">
-                      Category
-                    </label>
-                    <select
-                      value={newItem.category}
-                      onChange={e => setNewItem({ ...newItem, category: e.target.value })}
-                      className="w-full p-2 border rounded bg-gray-50"
-                    >
-                      <option value="fries">Fries & Chips</option>
-                      <option value="mains">Main Course</option>
-                      <option value="snacks">Snacks & Bites</option>
-                      <option value="drinks">Beverages</option>
-                      <option value="combos">Signature Combos</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-500 uppercase">
-                      Image Path
-                    </label>
-                    <input
-                      type="text"
-                      value={newItem.img}
-                      onChange={e => setNewItem({ ...newItem, img: e.target.value })}
-                      className="w-full p-2 border rounded bg-gray-50"
-                      placeholder="/food/my_image.jpg"
-                    />
-                  </div>
-
-                  <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-bold text-gray-500 uppercase">
-                      Description
-                    </label>
-                    <textarea
-                      value={newItem.desc}
-                      onChange={e => setNewItem({ ...newItem, desc: e.target.value })}
-                      className="w-full p-2 border rounded bg-gray-50"
-                      rows={2}
-                      placeholder="Short description of the item"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2 flex items-center justify-between">
-                    <button
-                      onClick={addItem}
-                      type="button"
-                      className="px-4 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold"
-                    >
-                      + Add Item
-                    </button>
-                    {addMessage && (
-                      <span className="text-xs text-gray-600">{addMessage}</span>
-                    )}
-                  </div>
-                </div>
-
-                <h3 className="font-bold text-lg">Existing Menu Items</h3>
-              </div>
-              {loading ? <p>Loading...</p> : (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-                  <table className="w-full text-left">
-                    <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
-                      <tr>
-                        <th className="p-4">Item</th>
-                        <th className="p-4">Price</th>
-                        <th className="p-4 text-center">Stock</th>
-                        <th className="p-4">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {menuItems.map(item => (
-                        <tr key={item.id} className="hover:bg-gray-50">
-                          <td className="p-4 font-bold text-sm text-gray-700">
-                            {item.name}
-                            <span className="text-gray-400 font-normal ml-2">({item.category})</span>
-                          </td>
-                          <td className="p-4">
-                            <input
-                              type="number"
-                              defaultValue={item.price}
-                              id={`price-${item.id}`}
-                              className="w-20 p-2 border rounded bg-white font-mono"
-                            />
-                          </td>
-                          <td className="p-4 text-center">
-                            <button
-                              onClick={() => toggleStock(item.id, item.available)}
-                              className={`px-3 py-1 rounded-full text-xs font-bold ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
-                            >
-                              {item.available ? 'In Stock' : 'Sold Out'}
-                            </button>
-                          </td>
-                          <td className="p-4 flex gap-2">
-                            <button
-                              onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)}
-                              className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"
-                            >
-                              <Save size={16} />
-                            </button>
-                            <button
-                              onClick={() => deleteItem(item.id)}
-                              className="bg-red-100 text-red-600 px-3 py-2 rounded text-xs font-bold"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </>
-          )}
-
-          {activeAdminTab === 'orders' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200">
-                <h3 className="font-bold text-lg">Recent Orders</h3>
-              </div>
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
-                  <tr>
-                    <th className="p-3">Time</th>
-                    <th className="p-3">Phone</th>
-                    <th className="p-3">Total (KES)</th>
-                    <th className="p-3">Status</th>
-                    <th className="p-3">Items</th>
-                    <th className="p-3">Action</th>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {loading ? <p>Loading...</p> : (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table className="w-full text-left">
+              <thead className="bg-gray-100 text-xs text-gray-500 uppercase">
+                <tr><th className="p-4">Item</th><th className="p-4">Price</th><th className="p-4 text-center">Stock</th><th className="p-4">Action</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {menuItems.map(item => (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="p-4 font-bold text-sm text-gray-700">{item.name} <span className="text-gray-400 font-normal ml-2">({item.category})</span></td>
+                    <td className="p-4"><input type="number" defaultValue={item.price} id={`price-${item.id}`} className="w-20 p-2 border rounded bg-white font-mono" /></td>
+                    <td className="p-4 text-center"><button onClick={() => toggleStock(item.id, item.available)} className={`px-3 py-1 rounded-full text-xs font-bold ${item.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{item.available ? 'In Stock' : 'Sold Out'}</button></td>
+                    <td className="p-4"><button onClick={() => updatePrice(item.id, document.getElementById(`price-${item.id}`).value)} className="bg-black text-white p-2 rounded hover:bg-gray-800 transition"><Save size={16}/></button></td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {orders.length === 0 && (
-                    <tr>
-                      <td className="p-4 text-gray-400 text-center" colSpan={6}>No orders yet.</td>
-                    </tr>
-                  )}
-                  {orders.map(order => (
-                    <tr key={order.id} className="align-top">
-                      <td className="p-3 text-xs text-gray-500">
-                        {order.created_at ? new Date(order.created_at).toLocaleString() : ''}
-                      </td>
-                      <td className="p-3 font-mono text-xs">{order.phone}</td>
-                      <td className="p-3 font-bold">{order.total}</td>
-                      <td className="p-3">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${order.status === 'paid' ? 'bg-green-100 text-green-700' : order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="p-3 text-xs text-gray-600 max-w-xs">
-                        {Array.isArray(order.items) && order.items.map(i => (
-                          <div key={i.id}>{i.qty} x {i.name}</div>
-                        ))}
-                      </td>
-                      <td className="p-3 space-x-2">
-                        <button
-                          onClick={() => updateOrderStatus(order.id, 'paid')}
-                          className="px-2 py-1 text-xs rounded bg-green-100 text-green-700 font-bold"
-                        >
-                          Mark Paid
-                        </button>
-                        <button
-                          onClick={() => updateOrderStatus(order.id, 'cancelled')}
-                          className="px-2 py-1 text-xs rounded bg-red-100 text-red-700 font-bold"
-                        >
-                          Cancel
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
-      <footer className="mt-10 py-4 text-center text-xs text-gray-400">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <a href="#" title="Instagram" aria-label="Instagram" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="igGradAdmin" x1="0%" x2="100%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="#FEDA75" />
-                  <stop offset="25%" stopColor="#FA7E1E" />
-                  <stop offset="50%" stopColor="#D62976" />
-                  <stop offset="75%" stopColor="#962FBF" />
-                  <stop offset="100%" stopColor="#4F5BD5" />
-                </linearGradient>
-              </defs>
-              <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#igGradAdmin)" />
-              <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="#fff" />
-              <circle cx="17.2" cy="6.8" r="0.7" fill="#fff" />
-            </svg>
-          </a>
-
-          <a href="#" title="WhatsApp" aria-label="WhatsApp" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#25D366" d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" />
-              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff" />
-            </svg>
-          </a>
-
-          <a href="#" title="Email" aria-label="Email" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="gMailGrad" x1="0%" x2="100%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="#4285F4" />
-                  <stop offset="50%" stopColor="#EA4335" />
-                  <stop offset="100%" stopColor="#FBBC05" />
-                </linearGradient>
-              </defs>
-              <rect x="3" y="5" width="18" height="14" rx="2" fill="url(#gMailGrad)" />
-              <path d="M3 7l9 7 9-7" fill="#fff" opacity="0.95" />
-            </svg>
-          </a>
-
-          <a href="#" title="TikTok" aria-label="TikTok" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#69C9D0" />
-              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#EE1D52" opacity="0.95" />
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#010101" opacity="0.9" />
-            </svg>
-          </a>
-        </div>
-        © {new Date().getFullYear()} Snack Have Hun Admin Panel. All rights reserved.
-      </footer>
     </div>
   );
 };
