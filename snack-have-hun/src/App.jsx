@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save, Download } from 'lucide-react'; // Added Download Icon
+import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
-import { supabase } from './supabase';
+import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
+
+// --- 1. SUPABASE CONNECTION (Keys from your screenshot) ---
+const supabaseUrl = 'https://ohlxtnthkgawqwefbevm.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9obHh0bnRoa2dhd3F3ZWZiZXZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3OTA5MDUsImV4cCI6MjA4MDM2NjkwNX0.d_SVhnZCouU6p7cYxsIjQv196bQhaWWvhfxuCsoiUEM';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {
@@ -17,7 +22,12 @@ const FoodImage = ({ src, alt }) => {
           <span className="text-[10px] font-bold uppercase">{alt}</span>
         </div>
       ) : (
-        <img src={src} alt={alt} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" onError={() => setError(true)} />
+        <img 
+          src={src} 
+          alt={alt} 
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
+          onError={() => setError(true)} 
+        />
       )}
     </div>
   );
@@ -26,10 +36,11 @@ const FoodImage = ({ src, alt }) => {
 const Logo = () => (
   <div className="relative w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center shadow-lg transform -rotate-3 border-2 border-white">
     <span className="text-white font-black text-xl italic tracking-tighter">SHH</span>
+    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
   </div>
 );
 
-// --- HERO IMAGES ---
+// --- CONFIGURATION ---
 const HERO_IMAGES = {
   fries: '/food/hero_fries.jpg',
   mains: '/food/hero_mains.jpg',
@@ -54,28 +65,21 @@ const CATEGORY_ICONS = {
   combos: '🌟'
 };
 
-// --- INSTALL BUTTON COMPONENT ---
+// --- INSTALL BUTTON ---
 const InstallButton = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-
   useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
+    const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
-
   const handleInstall = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') setDeferredPrompt(null);
   };
-
-  if (!deferredPrompt) return null; // Hidden if already installed or not supported
-
+  if (!deferredPrompt) return null;
   return (
     <button onClick={handleInstall} className="flex items-center gap-2 bg-black text-white px-3 py-2 rounded-full text-xs font-bold animate-pulse hover:bg-gray-800 transition">
       <Download size={14} /> Install App
@@ -83,7 +87,7 @@ const InstallButton = () => {
   );
 };
 
-// --- STATIC MENU ---
+// --- STATIC MENU (Instant Load) ---
 const INITIAL_MENU = [
   {
     id: 'fries', name: 'Fries & Chips', icon: '🍟', hero: '/food/hero_fries.jpg',
@@ -143,13 +147,13 @@ const CustomerMenu = () => {
 
   const handlePayment = async () => {
     if (!phoneNumber) return alert('Please enter your phone number');
-    
     setIsProcessing(true);
 
     try {
-      console.log("Saving order to database...");
+      console.log("Calling Backend API...");
       
-      const { error } = await supabase.from('orders').insert({
+      // 1. Log Order to Database
+      await supabase.from('orders').insert({
         phone: phoneNumber,
         total: cartTotal,
         items: cart.map(({ id, name, price, qty }) => ({ id, name, price, qty })),
@@ -157,24 +161,30 @@ const CustomerMenu = () => {
         created_at: new Date().toISOString(),
       });
 
-      if (error) console.error("Supabase Error:", error);
-
-      // Trigger Daraja API
+      // 2. Trigger M-Pesa STK Push via Backend
       const response = await axios.post('/api/pay', {
         phoneNumber: phoneNumber,
         amount: cartTotal
       });
 
+      console.log("Backend Reply:", response.data);
+
       if (response.data.ResponseCode === "0") {
-        alert(`✅ STK Push Sent to ${phoneNumber}! Enter PIN to pay KES ${cartTotal}.`);
+        alert(`✅ STK Push Sent to ${phoneNumber}! Check your phone to enter PIN.`);
         setCart([]); 
         setIsCartOpen(false);
       } else {
-        alert("❌ Safaricom Error: " + (response.data.errorMessage || "Try again."));
+        // Show the ACTUAL error from Safaricom (not generic)
+        alert("❌ M-Pesa Error: " + (response.data.errorMessage || JSON.stringify(response.data)));
       }
     } catch (error) {
-      console.error(error);
-      alert("❌ Connection Error. Please try again.");
+      console.error("Payment Failed:", error);
+      // Detailed Error Reporting
+      if (error.response) {
+        alert(`❌ Server Error (${error.response.status}): ${JSON.stringify(error.response.data)}`);
+      } else {
+        alert(`❌ Connection Error: ${error.message}`);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -185,9 +195,7 @@ const CustomerMenu = () => {
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-xl hidden sm:block text-orange-950">Snack Have Hun</h1></div>
         <div className="flex gap-3 items-center">
-          {/* NEW: Install Button (Only shows if installable) */}
           <InstallButton />
-          
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 hover:bg-orange-50 rounded-full">
             <ShoppingCart className="text-orange-700" />
             {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{cart.reduce((a,b) => a + b.qty, 0)}</span>}
@@ -256,6 +264,8 @@ const CustomerMenu = () => {
               <div className="border-t pt-4 mt-4">
                 <div className="flex justify-between text-xl font-black mb-4"><span>Total</span><span className="text-orange-600">KES {cartTotal}</span></div>
                 <input type="tel" placeholder="0712..." value={phoneNumber} onChange={e=>setPhoneNumber(e.target.value)} className="w-full bg-gray-100 p-4 rounded-xl mb-3 border border-gray-200"/>
+                
+                {/* DARAJA PAY BUTTON */}
                 <button onClick={handlePayment} disabled={isProcessing} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg flex justify-center items-center gap-2">
                   {isProcessing ? 'Processing...' : <>Pay with M-Pesa <CheckCircle size={20}/></>}
                 </button>
