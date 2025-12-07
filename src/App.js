@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Plus, Minus, Trash2, Search, Menu, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // --- FULL MENU DATA (Based on your Prompt) ---
 const MENU_DATA = [
@@ -90,6 +91,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-orange-50 font-sans text-gray-800">
+      <SpeedInsights />
       
       {/* HEADER / NAV */}
       <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md shadow-sm border-b border-orange-100 px-4 py-4 flex justify-between items-center">

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
 import SocialFooter from './components/SocialFooter';
-import { SpeedInsights } from "@vercel/speed-insights/react"
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {
@@ -702,6 +702,7 @@ const AdminDashboard = () => {
 export default function App() {
   return (
     <BrowserRouter>
+      <SpeedInsights />
       <Routes>
         <Route path="/" element={<CustomerMenu />} />
         <Route path="/admin" element={<AdminDashboard />} />
