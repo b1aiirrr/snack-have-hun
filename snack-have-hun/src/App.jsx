@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
 import SocialFooter from './components/SocialFooter';
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 // --- IMAGE COMPONENT ---
 const FoodImage = ({ src, alt }) => {
