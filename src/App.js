@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Plus, Minus, Trash2, Search, Menu, X, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from './supabaseClient';
 
 // --- FULL MENU DATA (Based on your Prompt) ---
 const MENU_DATA = [
@@ -87,6 +88,26 @@ export default function App() {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+  async function handleCheckout(cartItems, totalPrice) {
+    const orderData = {
+      customer_name: "Guest Customer",
+      total_price: totalPrice || 0,
+      status: 'Pending',
+      items: cartItems || []
+    };
+
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([orderData])
+      .select();
+
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      alert("✅ Order Placed! Kitchen is preparing it.");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-orange-50 font-sans text-gray-800">
@@ -237,7 +258,7 @@ export default function App() {
                   <span>Total</span>
                   <span className="text-orange-600">KES {cartTotal}</span>
                 </div>
-                <button className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-700 shadow-lg shadow-orange-200 transition-all flex justify-center items-center gap-2">
+                <button className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-orange-700 shadow-lg shadow-orange-200 transition-all flex justify-center items-center gap-2" onClick={() => handleCheckout(cart, cartTotal)}>
                   Checkout via M-Pesa <CheckCircle size={20} />
                 </button>
               </div>
