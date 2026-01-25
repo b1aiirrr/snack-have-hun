@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
@@ -18,11 +18,12 @@ const FoodImage = ({ src, alt }) => {
           <span className="text-[10px] font-bold uppercase">{alt}</span>
         </div>
       ) : (
-        <img 
-          src={src} 
-          alt={alt} 
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
-          onError={() => setError(true)} 
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          style={{ filter: 'contrast(1.05) saturate(1.05) brightness(1.02)' }}
+          onError={() => setError(true)}
         />
       )}
     </div>
@@ -88,7 +89,30 @@ const CustomerMenu = () => {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
-  
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  // PWA Install Logic
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowInstallBtn(false);
+      setDeferredPrompt(null);
+    }
+  };
+
   // FETCH FROM DATABASE
   useEffect(() => {
     const fetchMenu = async () => {
@@ -128,20 +152,28 @@ const CustomerMenu = () => {
       <nav className="sticky top-0 z-40 bg-white shadow-sm border-b border-orange-100 px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2"><Logo /><h1 className="font-extrabold text-lg text-orange-950">Snack Have Hun</h1></div>
         <div className="flex gap-3">
+          {showInstallBtn && (
+            <button
+              onClick={handleInstallClick}
+              className="flex items-center gap-1 bg-orange-600 text-white px-3 py-1.5 rounded-full text-xs font-bold hover:bg-orange-700 transition-all shadow-sm"
+            >
+              <Download size={14} /> Install
+            </button>
+          )}
           <button onClick={() => setIsCartOpen(true)} className="relative p-2 hover:bg-orange-50 rounded-full">
             <ShoppingCart className="text-orange-700" />
-            {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{cart.reduce((a,b) => a + b.qty, 0)}</span>}
+            {cart.length > 0 && <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">{cart.reduce((a, b) => a + b.qty, 0)}</span>}
           </button>
         </div>
       </nav>
 
       {/* Hero */}
       <div className="relative h-[350px] text-white flex items-end overflow-hidden shadow-xl">
-        <div className="absolute inset-0 bg-cover bg-center transition-all duration-700" style={{ backgroundImage: `url('${activeCatData?.hero}')` }}></div>
+        <div className="absolute inset-0 bg-cover bg-center transition-all duration-700" style={{ backgroundImage: `url('${activeCatData?.hero}')`, filter: 'contrast(1.05) saturate(1.05) brightness(1.02)' }}></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
         <div className="relative z-10 px-6 py-10 w-full max-w-6xl mx-auto">
           <span className="bg-orange-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2 inline-block">{activeCatData?.name}</span>
-          <h2 className="text-4xl md:text-6xl font-black drop-shadow-lg">Kenyan Street Food,<br/>Elevated.</h2>
+          <h2 className="text-4xl md:text-6xl font-black drop-shadow-lg">Kenyan Street Food,<br />Elevated.</h2>
         </div>
       </div>
 
@@ -184,7 +216,7 @@ const CustomerMenu = () => {
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }} onClick={() => setIsCartOpen(false)} className="fixed inset-0 bg-black z-50" />
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} className="fixed right-0 top-0 bottom-0 w-full md:w-[400px] bg-white z-[60] shadow-2xl p-6 flex flex-col h-full">
-              <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-black">Order Tray</h2><button onClick={() => setIsCartOpen(false)}><X/></button></div>
+              <div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-black">Order Tray</h2><button onClick={() => setIsCartOpen(false)}><X /></button></div>
               <div className="flex-1 overflow-y-auto space-y-4">
                 {cart.map(item => (
                   <div key={item.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-xl">
@@ -195,17 +227,17 @@ const CustomerMenu = () => {
               </div>
               <div className="border-t pt-4 mt-4">
                 <div className="flex justify-between text-xl font-black mb-4"><span>Total</span><span className="text-orange-600">KES {cartTotal}</span></div>
-                <input type="tel" placeholder="0712..." value={phoneNumber} onChange={e=>setPhoneNumber(e.target.value)} className="w-full bg-gray-100 p-4 rounded-xl mb-3 border border-gray-200"/>
-                
+                <input type="tel" placeholder="0712..." value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="w-full bg-gray-100 p-4 rounded-xl mb-3 border border-gray-200" />
+
                 {/* MANUAL TILL NUMBER PAYMENT */}
                 <div className="space-y-3">
                   <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-900">
                     <p className="font-bold">Pay via M-Pesa Till Number</p>
                     <p className="mt-1">
-                      1. Open <span className="font-semibold">M-Pesa</span> on your phone<br/>
-                      2. Lipa na M-Pesa → Buy Goods and Services<br/>
-                      3. Till Number: <span className="font-mono font-bold">6920615</span><br/>
-                      4. Amount: <span className="font-mono font-bold">KES {cartTotal}</span><br/>
+                      1. Open <span className="font-semibold">M-Pesa</span> on your phone<br />
+                      2. Lipa na M-Pesa → Buy Goods and Services<br />
+                      3. Till Number: <span className="font-mono font-bold">6920615</span><br />
+                      4. Amount: <span className="font-mono font-bold">KES {cartTotal}</span><br />
                       5. Use your phone number above
                     </p>
                   </div>
@@ -247,36 +279,36 @@ const CustomerMenu = () => {
           {/* WhatsApp */}
           <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="WhatsApp" aria-label="WhatsApp">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill="currentColor"/>
-              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff"/>
+              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill="currentColor" />
+              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff" />
             </svg>
           </a>
           {/* Instagram */}
           <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Instagram" aria-label="Instagram">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor"/>
-              <circle cx="12" cy="12" r="3.2" fill="#fff"/>
-              <circle cx="17.5" cy="6.5" r="0.5" fill="#fff"/>
+              <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" />
+              <circle cx="12" cy="12" r="3.2" fill="#fff" />
+              <circle cx="17.5" cy="6.5" r="0.5" fill="#fff" />
             </svg>
           </a>
           {/* X (Twitter) */}
           <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="X" aria-label="X">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M23 4.01a10.9 10.9 0 0 1-3.14.86A4.48 4.48 0 0 0 22.4 2a9.05 9.05 0 0 1-2.88 1.1A4.52 4.52 0 0 0 11.07 6.3a12.8 12.8 0 0 1-9.29-4.7 4.5 4.5 0 0 0 1.4 6.03A4.42 4.42 0 0 1 2 7.7v.06a4.51 4.51 0 0 0 3.63 4.42 4.52 4.52 0 0 1-2.04.08 4.5 4.5 0 0 0 4.2 3.12A9.06 9.06 0 0 1 1 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.84-6.88 12.84-12.84v-.59A9.2 9.2 0 0 0 23 4.01z" fill="#fff"/>
+              <path d="M23 4.01a10.9 10.9 0 0 1-3.14.86A4.48 4.48 0 0 0 22.4 2a9.05 9.05 0 0 1-2.88 1.1A4.52 4.52 0 0 0 11.07 6.3a12.8 12.8 0 0 1-9.29-4.7 4.5 4.5 0 0 0 1.4 6.03A4.42 4.42 0 0 1 2 7.7v.06a4.51 4.51 0 0 0 3.63 4.42 4.52 4.52 0 0 1-2.04.08 4.5 4.5 0 0 0 4.2 3.12A9.06 9.06 0 0 1 1 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.84-6.88 12.84-12.84v-.59A9.2 9.2 0 0 0 23 4.01z" fill="#fff" />
             </svg>
           </a>
           {/* Email */}
           <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Email" aria-label="Email">
             <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" fill="currentColor"/>
-              <path d="M21 6.5l-9 7-9-7" fill="#fff"/>
+              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" fill="currentColor" />
+              <path d="M21 6.5l-9 7-9-7" fill="#fff" />
             </svg>
           </a>
           {/* TikTok */}
           <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="TikTok" aria-label="TikTok">
             <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#fff"/>
-              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#fff"/>
+              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#fff" />
+              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#fff" />
             </svg>
           </a>
         </div>
@@ -646,7 +678,7 @@ const AdminDashboard = () => {
       </div>
       <footer className="mt-10 py-4 text-center text-xs text-gray-400">
         <div className="flex items-center justify-center gap-3 mb-2">
-          <a href="#" title="Instagram" aria-label="Instagram" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+          <a href="#" title="Instagram" aria-label="Instagram" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="igGradAdmin" x1="0%" x2="100%" y1="0%" y2="100%">
@@ -663,14 +695,14 @@ const AdminDashboard = () => {
             </svg>
           </a>
 
-          <a href="#" title="WhatsApp" aria-label="WhatsApp" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+          <a href="#" title="WhatsApp" aria-label="WhatsApp" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path fill="#25D366" d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" />
               <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff" />
             </svg>
           </a>
 
-          <a href="#" title="Email" aria-label="Email" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+          <a href="#" title="Email" aria-label="Email" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="gMailGrad" x1="0%" x2="100%" y1="0%" y2="100%">
@@ -684,7 +716,7 @@ const AdminDashboard = () => {
             </svg>
           </a>
 
-          <a href="#" title="TikTok" aria-label="TikTok" className="p-2 rounded-md hover:opacity-90" style={{display:'inline-flex',alignItems:'center',justifyContent:'center'}}>
+          <a href="#" title="TikTok" aria-label="TikTok" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#69C9D0" />
               <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#EE1D52" opacity="0.95" />
