@@ -1,0 +1,25 @@
+
+> snack-have-hun@0.0.0 lint
+> eslint .
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+D:\snack-have-hun\snack-have-hun\api\pay.js
+   8:24  error  'amount' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  21:18  error  'Buffer' is not defined                                                                 no-undef
+  37:22  error  'Buffer' is not defined                                                                 no-undef
+
+D:\snack-have-hun\snack-have-hun\server\server.js
+   1:17   error  'require' is not defined  no-undef
+   2:15   error  'require' is not defined  no-undef
+   3:14   error  'require' is not defined  no-undef
+  20:22   error  'Buffer' is not defined   no-undef
+  54:22   error  'Buffer' is not defined   no-undef
+  89:12   error  'process' is not defined  no-undef
+  89:107  error  'process' is not defined  no-undef
+
+D:\snack-have-hun\snack-have-hun\src\App.jsx
+  4:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Γ£û 11 problems (11 errors, 0 warnings)
+
