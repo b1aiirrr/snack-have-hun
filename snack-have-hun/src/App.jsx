@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save, Download } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Search, X, CheckCircle, MapPin, ChevronRight, Lock, Save, Download, MessageCircle, Instagram, Facebook, Twitter, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from './supabase';
@@ -79,7 +79,10 @@ const INITIAL_MENU = [
       { id: 107, name: 'Potato Wedges', price: 100, desc: 'Chunky and crispy.', img: '/food/potato_wedges.jpg', available: true },
     ]
   },
-  // ... (Other categories will load from DB, but this keeps the UI stable)
+  { id: 'mains', name: 'Main Course', icon: '🍖', hero: '/food/hero_mains.jpg', items: [] },
+  { id: 'snacks', name: 'Snacks & Bites', icon: '🥟', hero: '/food/hero_snacks.jpg', items: [] },
+  { id: 'drinks', name: 'Beverages', icon: '🥤', hero: '/food/hero_drinks.jpg', items: [] },
+  { id: 'combos', name: 'Signature Combos', icon: '🌟', hero: '/food/hero_combos.jpg', items: [] }
 ];
 
 // --- 1. CUSTOMER MENU ---
@@ -190,7 +193,19 @@ const CustomerMenu = () => {
 
       {/* Grid */}
       <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activeCatData?.items.map((item) => (
+        {activeCatData?.items.length === 0 ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl shadow-sm border border-orange-50 overflow-hidden flex flex-col animate-pulse h-[350px]">
+              <div className="h-48 bg-gray-200"></div>
+              <div className="p-5 flex flex-col flex-grow space-y-3">
+                <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-100 rounded w-full"></div>
+                <div className="h-4 bg-gray-100 rounded w-5/6 mb-4"></div>
+                <div className="h-12 bg-orange-100 rounded-xl mt-auto"></div>
+              </div>
+            </div>
+          ))
+        ) : activeCatData?.items.map((item) => (
           <motion.div key={item.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-2xl shadow-sm border border-orange-50 overflow-hidden flex flex-col group hover:shadow-lg transition-all">
             <div className="h-48 overflow-hidden relative">
               <FoodImage src={item.img} alt={item.name} />
@@ -274,45 +289,25 @@ const CustomerMenu = () => {
           </>
         )}
       </AnimatePresence>
-      <footer className="mt-6 py-6 text-center text-sm text-gray-500">
-        <div className="flex items-center justify-center gap-4 mb-2">
-          {/* WhatsApp */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="WhatsApp" aria-label="WhatsApp">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" fill="currentColor" />
-              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff" />
-            </svg>
+      <footer className="mt-12 py-10 text-center text-sm bg-white border-t border-orange-100">
+        <div className="flex items-center justify-center gap-6 mb-6">
+          <a href="#" aria-label="WhatsApp" className="p-3 bg-green-50 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-1">
+            <MessageCircle size={22} />
           </a>
-          {/* Instagram */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Instagram" aria-label="Instagram">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" />
-              <circle cx="12" cy="12" r="3.2" fill="#fff" />
-              <circle cx="17.5" cy="6.5" r="0.5" fill="#fff" />
-            </svg>
+          <a href="#" aria-label="Instagram" className="p-3 bg-pink-50 text-pink-600 rounded-full hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-pink-500 hover:to-purple-600 hover:text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-1">
+            <Instagram size={22} />
           </a>
-          {/* X (Twitter) */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="X" aria-label="X">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M23 4.01a10.9 10.9 0 0 1-3.14.86A4.48 4.48 0 0 0 22.4 2a9.05 9.05 0 0 1-2.88 1.1A4.52 4.52 0 0 0 11.07 6.3a12.8 12.8 0 0 1-9.29-4.7 4.5 4.5 0 0 0 1.4 6.03A4.42 4.42 0 0 1 2 7.7v.06a4.51 4.51 0 0 0 3.63 4.42 4.52 4.52 0 0 1-2.04.08 4.5 4.5 0 0 0 4.2 3.12A9.06 9.06 0 0 1 1 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.84-6.88 12.84-12.84v-.59A9.2 9.2 0 0 0 23 4.01z" fill="#fff" />
-            </svg>
+          <a href="#" aria-label="Facebook" className="p-3 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-600 hover:text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-1">
+            <Facebook size={22} />
           </a>
-          {/* Email */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="Email" aria-label="Email">
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 6.5h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-11z" fill="currentColor" />
-              <path d="M21 6.5l-9 7-9-7" fill="#fff" />
-            </svg>
+          <a href="#" aria-label="Twitter" className="p-3 bg-sky-50 text-sky-500 rounded-full hover:bg-sky-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-1">
+            <Twitter size={22} />
           </a>
-          {/* TikTok */}
-          <a href="#" className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white hover:opacity-90" title="TikTok" aria-label="TikTok">
-            <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#fff" />
-              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#fff" />
-            </svg>
+          <a href="#" aria-label="Email" className="p-3 bg-red-50 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-1">
+            <Mail size={22} />
           </a>
         </div>
-        <div className="text-xs text-gray-400">© {new Date().getFullYear()} Snack Have Hun. All rights reserved.</div>
+        <div className="text-gray-500 font-medium">© {new Date().getFullYear()} Snack Have Hun. All rights reserved.</div>
       </footer>
 
 
@@ -676,55 +671,25 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-      <footer className="mt-10 py-4 text-center text-xs text-gray-400">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <a href="#" title="Instagram" aria-label="Instagram" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="igGradAdmin" x1="0%" x2="100%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="#FEDA75" />
-                  <stop offset="25%" stopColor="#FA7E1E" />
-                  <stop offset="50%" stopColor="#D62976" />
-                  <stop offset="75%" stopColor="#962FBF" />
-                  <stop offset="100%" stopColor="#4F5BD5" />
-                </linearGradient>
-              </defs>
-              <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#igGradAdmin)" />
-              <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" fill="#fff" />
-              <circle cx="17.2" cy="6.8" r="0.7" fill="#fff" />
-            </svg>
+      <footer className="mt-12 py-8 text-center bg-white border-t border-gray-200">
+        <div className="flex items-center justify-center gap-6 mb-4">
+          <a href="#" aria-label="WhatsApp" className="text-gray-400 hover:text-green-500 transition-colors">
+            <MessageCircle size={20} />
           </a>
-
-          <a href="#" title="WhatsApp" aria-label="WhatsApp" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#25D366" d="M12 2C6.477 2 2 6.477 2 12c0 1.856.49 3.595 1.345 5.12L2 22l4.97-1.324A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" />
-              <path d="M16.5 14.5c-.4 0-1 .2-1.7.2-.9 0-1.6-.6-2.6-.9-.7-.2-1.2-.4-1.7.2l-.9.9c-.2.2-.5.3-.8.2-1-.3-3.2-1.2-3.2-3.7 0-2 .9-3.3 1.4-3.8.4-.4 1-.5 1.6-.5.6 0 1.2 0 1.7.1.5.1 1 .1 1.6-.1.5-.2.9-.6 1.2-1 .3-.4.6-.5 1-.5.4 0 .9.1 1.2.4.3.3 1 1 1 2.4 0 1.4-.7 2.8-.8 3.1-.1.2-.2.4-.3.4z" fill="#fff" />
-            </svg>
+          <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-pink-500 transition-colors">
+            <Instagram size={20} />
           </a>
-
-          <a href="#" title="Email" aria-label="Email" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="gMailGrad" x1="0%" x2="100%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="#4285F4" />
-                  <stop offset="50%" stopColor="#EA4335" />
-                  <stop offset="100%" stopColor="#FBBC05" />
-                </linearGradient>
-              </defs>
-              <rect x="3" y="5" width="18" height="14" rx="2" fill="url(#gMailGrad)" />
-              <path d="M3 7l9 7 9-7" fill="#fff" opacity="0.95" />
-            </svg>
+          <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-blue-600 transition-colors">
+            <Facebook size={20} />
           </a>
-
-          <a href="#" title="TikTok" aria-label="TikTok" className="p-2 rounded-md hover:opacity-90" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#69C9D0" />
-              <path d="M8 21a6 6 0 0 0 8-5.8v-1.2" fill="#EE1D52" opacity="0.95" />
-              <path d="M16 8.5a4 4 0 0 1-4-4v7.8A4.2 4.2 0 1 0 16 8.5z" fill="#010101" opacity="0.9" />
-            </svg>
+          <a href="#" aria-label="Twitter" className="text-gray-400 hover:text-sky-500 transition-colors">
+            <Twitter size={20} />
+          </a>
+          <a href="#" aria-label="Email" className="text-gray-400 hover:text-red-500 transition-colors">
+            <Mail size={20} />
           </a>
         </div>
-        © {new Date().getFullYear()} Snack Have Hun Admin Panel. All rights reserved.
+        <div className="text-sm text-gray-500 font-medium">© {new Date().getFullYear()} Snack Have Hun Admin Panel. All rights reserved.</div>
       </footer>
     </div>
   );
